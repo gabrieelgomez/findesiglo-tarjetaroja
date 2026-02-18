@@ -1,0 +1,93 @@
+<% cache [*spree_base_cache_scope.call(address), @order&.id] do %>
+  <div class="address vcard">
+    <% if @order.present? %>
+      <div class="order-number">
+        <span class="type">Número de orden: </span>
+        <%= @order.number %>
+      </div>
+    <% end %>
+    <% if address.full_name.present? %>
+      <div class="fn">
+        <span class="type">Enviar a: </span>
+        <%= address.full_name %>
+      </div>
+    <% end %>
+    <% unless address.company.blank? %>
+      <div class="org">
+        <span class="type">Empresa: </span>
+        <%= address.company %>
+      </div>
+    <% end %>
+
+
+    <% unless address.identifier.blank? %>
+      <div class="org">
+        <span class="type">Cédula: </span>
+        <%= address.identifier %>
+      </div>
+    <% end %>
+
+    <% unless address.phone.blank? %>
+      <div class="tel">
+        <span class="type">Teléfono:</span>
+        <%= address.phone %>
+      </div>
+    <% end %>
+
+    <div class="adr">
+      <div class="street-address">
+        <div class="street-address-line">
+          Dirección: <%= address.address1 %>
+        </div>
+        <% unless address.agency.blank? %>
+          <div class="street-address-line">
+            Agencia: <%= address.agency %>
+          </div>
+        <% end %>
+
+        <% unless address.address2.blank? %>
+          <div class="street-address-line">
+            <%= address.address2 %>
+          </div>
+        <% end %>
+
+      </div>
+      <div class="local">
+        <span class="locality"><%= address.city %></span>
+        <span class="region"><%= address.state_text %></span>
+        <span class="postal-code"><%= address.zipcode %></span>
+      </div>
+    </div>
+    <% unless address.alternative_phone.blank? %>
+      <div class="alternative-phone tel">
+        <span class="type"><%= Spree.t(:alternative_phone) %></span>
+        <%= address.alternative_phone %>
+      </div>
+    <% end %>
+    
+    <!-- Botones para generar imagen / ticket -->
+    <div class="mt-3 d-flex flex-wrap gap-2 align-items-center">
+      <button type="button" class="btn btn-sm btn-outline-dark btn-generar-ticket-escpos" 
+              data-address-id="<%= address.id %>"
+              data-order-id="<%= @order&.id %>"
+              title="Imprimir en impresora térmica (ESC/POS). QZ Tray o PrintNode.">
+        <i class="fas fa-receipt"></i> Generar ticket ESC/POS
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-primary" 
+              data-toggle="modal" 
+              data-target="#address-image-modal"
+              data-address-id="<%= address.id %>"
+              data-order-id="<%= @order&.id %>">
+        <i class="fas fa-image"></i> Generar Ticket
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-success" 
+              data-toggle="modal" 
+              data-target="#address-image-a4-modal"
+              data-address-id="<%= address.id %>"
+              data-order-id="<%= @order&.id %>"
+              data-phone="<%= address.phone %>">
+        <i class="fas fa-file-pdf"></i> Generar Nota de Entrega
+      </button>
+    </div>
+  </div>
+<% end %>

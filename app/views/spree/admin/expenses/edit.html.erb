@@ -1,0 +1,78 @@
+<% content_for :page_title do %>
+  Editar Gasto
+<% end %>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Editar Información del Gasto</h3>
+      </div>
+      <div class="card-body">
+        <%= form_with model: [:admin, @expense], local: true do |f| %>
+          <% if @expense.errors.any? %>
+            <div class="alert alert-danger">
+              <h4><%= pluralize(@expense.errors.count, "error") %> impidieron guardar este gasto:</h4>
+              <ul>
+                <% @expense.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= f.label :description, 'Descripción' %>
+            <%= f.text_area :description, class: 'form-control', rows: 3, required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :amount, 'Monto' %>
+            <%= f.number_field :amount, class: 'form-control', step: '0.01', min: '0.01', required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :spree_payment_method_id, 'Método de Pago' %>
+            <%= f.collection_select :spree_payment_method_id, Spree::PaymentMethod.where(active: true), :id, :name, { prompt: 'Seleccione un método de pago' }, { class: 'form-control', required: true } %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :state, 'Estado' %>
+            <%= f.select :state, Expense.states.keys.map { |s| [s.humanize, s] }, {}, { class: 'form-control' } %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :current_balance, 'Balance Actual (opcional)' %>
+            <%= f.number_field :current_balance, class: 'form-control', step: '0.01', min: '0' %>
+          </div>
+
+          <div class="form-group">
+            <label class="mr-2">
+              <%= f.check_box :traspaso %>
+              Es un traspaso entre métodos de pago
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <%= f.submit 'Actualizar Gasto', class: 'btn btn-primary' %>
+            <%= link_to 'Cancelar', spree.admin_transactions_path, class: 'btn btn-secondary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Información del Gasto</h4>
+      </div>
+      <div class="card-body">
+        <p><strong>ID:</strong> <%= @expense.id %></p>
+        <p><strong>Creado:</strong> <%= @expense.created_at.strftime('%d/%m/%Y %H:%M') %></p>
+        <p><strong>Última actualización:</strong> <%= @expense.updated_at.strftime('%d/%m/%Y %H:%M') %></p>
+        <p><strong>Creado por:</strong> <%= @expense.spree_user&.email || 'N/A' %></p>
+      </div>
+    </div>
+  </div>
+</div> 

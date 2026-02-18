@@ -1,0 +1,285 @@
+es:
+  identifier: "Cédula de identidad"
+  spree:
+    login: Iniciar sesión
+    logout: Cerrar sesión
+    sign_up: Registrarse
+    forgot_password: Olvidé mi contraseña
+    remember_me: Recordarme
+    forgot_password_question: ¿Olvidaste tu contraseña?
+    forgot_password_link: Recuperar contraseña
+    minimum_password_length: "La contraseña debe tener al menos %{count} caracteres"
+    admin:
+      amount_spent: Monto gastado
+      audit_log: Registro de auditoría
+      avg_order_value: Valor promedio del pedido
+      back_to_dashboard: Volver al panel
+      bulk_ops:
+        products:
+          body:
+            add_tags: 'Selecciona las etiquetas para añadir a los productos:'
+            add_to_brand: 'Selecciona la marca a la que añadir los productos:'
+            add_to_taxons: 'Selecciona los taxones a los que añadir los productos:'
+            remove_from_taxons: 'Selecciona los taxones de los que eliminar los productos:'
+            remove_tags: 'Selecciona las etiquetas para eliminar de los productos:'
+            set_return_rule: Selecciona la política de devolución para los productos
+            set_status:
+              active: Establecer los productos como activos los hará visibles en la tienda.
+              archived: Establecer los productos como archivados los ocultará de la tienda.
+              draft: Establecer los productos como borrador los ocultará de la tienda.
+          status_updated: Estado actualizado
+          title:
+            add_tags: Añadir etiquetas
+            add_to_brand: Añadir a marca
+            add_to_taxons: Añadir a taxones
+            remove_from_brand: Eliminar de marca
+            remove_from_taxons: Eliminar de taxones
+            remove_tags: Eliminar etiquetas
+            set_return_rule: Establecer política de devolución
+            set_size_chart: Establecer tabla de tallas
+            set_status: Establecer como %{status}
+        users:
+          body:
+            add_tags: 'Selecciona las etiquetas para añadir a los clientes:'
+            remove_tags: 'Selecciona las etiquetas para eliminar de los clientes:'
+          title:
+            add_tags: Añadir etiquetas
+            remove_tags: Eliminar etiquetas
+      checkout_settings:
+        checkout_message_description: Visible para tus clientes en la página de pago, en la barra lateral derecha.
+        guest_checkout:
+          description: Permitir a los clientes comprar sin crear una cuenta.
+          label: Permitir compra como invitado
+        policy_copy: Los enlaces del pie de página del pago se añaden automáticamente según el contenido de %{policies_link}.
+        special_instructions:
+          description: Permitir a los clientes añadir instrucciones especiales a su pedido.
+          label: Mostrar campo de instrucciones especiales
+      copied: ¡Copiado!
+      copy_payment_link: Copiar enlace de pago
+      copy_to_clipboard: Copiar al portapapeles
+      coupon_codes:
+        unused: No usado
+        used: Usado
+      created_at: Creado el
+      dashboard:
+        getting_started:
+          description: Todo lo que necesitas para comenzar a vender.
+        hi: Hola
+        top_products: Productos más vendidos
+        view_report: Ver informe
+        whats_happening_on: Esto es lo que está pasando en <strong>%{store_name}</strong> hoy.
+      digital_shipment_fulfillment_note: Este envío se marcará como completado una vez que el usuario descargue el producto digital
+      display_on_options:
+        back_end: Solo en panel de administración
+        both: En panel de administración y tienda
+        front_end: Solo en la tienda
+      edit_billing_address: Editar dirección de facturación
+      edit_contact_information: Editar información de contacto
+      edit_profile: Editar perfil
+      edit_shipping_address: Editar dirección de envío
+      edit_theme: Editar tema
+      errors: Errores
+      execution_time: Tiempo de ejecución
+      export_all: Exportar todos los registros (puede tardar con grandes volúmenes de datos)
+      export_created: Tu exportación ha comenzado. Recibirás un correo con el enlace de descarga cuando esté listo.
+      export_only_filtered_records: Exportar solo los registros filtrados, que coincidan con la búsqueda
+      filters: Filtros
+      getting_started: Comenzar
+      gift_card_batches:
+        codes_count: Cantidad de códigos
+        new_gift_card_batch: Nueva tanda de tarjetas regalo
+        prefix: Prefijo
+      gift_cards:
+        active: Activas
+        all: Todas
+        all_statuses: Todos los estados
+        code_help_text: Si lo dejas en blanco, generaremos el código por ti
+        redeemed: Canjeadas
+        usage: Uso
+      integrations:
+        invalid_integration_type: Esta integración no está permitida
+        page_subtitle: Conecta tu tienda con servicios de terceros para mejorar la experiencia del cliente.
+      manage_currencies: Gestionar monedas
+      manage_properties: Gestionar propiedades
+      manage_stock_locations: Gestionar ubicaciones de stock
+      manage_taxons: Gestionar taxones
+      manage_zones: Gestionar zonas
+      name: Nombre
+      navigation:
+        nested_under: Anidado bajo
+      not_tracking_inventory: Sin seguimiento de inventario
+      notifications: Notificaciones
+      num_orders: N.º de pedidos
+      oauth_applications:
+        last_used: Último uso
+        list: Claves API
+        never: Nunca
+        new: Nueva clave API
+        read_and_write: Lectura y escritura
+        read_only: Solo lectura
+        scopes: Ámbitos
+      order:
+        events:
+          approve: Aprobar
+          cancel: Cancelar
+          resend: Reenviar
+          resume: Reanudar
+      orders:
+        add_user_to_this_order: Añadir cliente a este pedido
+        all_orders: Todos los pedidos
+        canceled: Cancelado
+        fulfilled: Completado
+        no_email_present: Por favor añade un correo para enviar el enlace de pago
+        orders_to_fulfill: Pedidos por completar
+        partially_refunded: Parcialmente reembolsado
+        payment_link_sent: Enlace de pago enviado al cliente
+        refunded: Reembolsado
+        remove_user_from_this_order: Eliminar cliente de este pedido
+        unfulfilled: No completado
+      page_builder:
+        background_color: Color de fondo
+        border_bottom_width: Ancho del borde inferior
+        border_color: Color del borde
+        border_top_width: Ancho del borde superior
+        bottom_padding: Relleno inferior
+        button_alignment: Alineación del botón
+        button_background_color: Color de fondo del botón
+        button_style: Estilo del botón
+        button_text: Texto del botón
+        button_text_color: Color del texto del botón
+        category: Categoría
+        description: Descripción
+        description_alignment: Alineación de la descripción
+        desktop_image_alignment: Alineación de imagen en escritorio
+        desktop_logo_height: Altura del logo (escritorio)
+        heading: Encabezado
+        heading_alignment: Alineación del encabezado
+        heading_size: Tamaño del encabezado
+        height: Altura
+        left_aligned: Alineado a la izquierda
+        logo_centered: Logo centrado
+        max_video_width_on_desktop: Ancho máximo del video en escritorio
+        maximum_posts_to_show: Máximo de publicaciones a mostrar
+        maximum_products_to_show: Máximo de productos a mostrar
+        nav_centered: Navegación centrada
+        not_set: No establecido
+        separated: Separado
+        show_more_button: Mostrar botón de explorar categoría
+        show_taxon_image: Mostrar imagen del taxón
+        text_color: Color del texto
+        title: Título
+        top_padding: Relleno superior
+        use_description_from_admin: Usar descripción del administrador
+        vertical_alignment: Alineación vertical
+        youtube_video_url: URL del video de YouTube
+      personal_details: Datos personales
+      products:
+        active: Activos
+        all_statuses: Todos los estados
+        any_stock: Cualquier stock
+        archived: Archivados
+        by_status: Por estado
+        by_stock: Por stock
+        deleted: Eliminados
+        draft: Borrador
+        help_bubble: Los productos en borrador no están disponibles para la compra. Los productos activos están en línea.
+        in_stock: En stock
+        inventory:
+          barcode: Código de barras (ISBN, UPC, GTIN, etc.)
+          sku: SKU (Unidad de mantenimiento de stock)
+        out_of_stock: Agotado
+        paused: Pausado
+        search_results:
+          no_products: No se encontraron productos que coincidan con tu búsqueda :(
+        seo:
+          placeholder: Añade un título y descripción para ver cómo aparecería este producto en los resultados de búsqueda
+        status_form:
+          available_on: Fecha de disponibilidad del producto. Usa una futura para pre-venta.
+          discontinue_on: Fecha en la que el producto debe dejar de mostrarse automáticamente
+          make_active_at: Fecha en la que el producto debe pasar a estado "activo"
+          status: Los productos en borrador no están disponibles para la compra. Los productos activos están en línea.
+        stores:
+          choose_stores: Selecciona en qué tiendas debe estar disponible este producto
+        variants:
+          option_types_link: Para añadir más tipos de opciones, ve a <a href="%{link}">Tipos de opción</a>
+      recommended_size: Tamaño recomendado
+      report_created: Tu informe se está generando. Recibirás un correo con el enlace de descarga.
+      reset_digital_link_download_limits: Restablecer límites de descarga
+      response_code: Código de respuesta
+      selected: seleccionado
+      send_payment_link: Enviar enlace de pago
+      shipment_transfer:
+        wrong_destination: Destino incorrecto
+      stock_transfers:
+        add_products_tip: Primero debes seleccionar una ubicación de destino
+      store_credit:
+        amount_remaining_of_total: "<strong>%{amount}</strong> restante (<strong>%{total}</strong> total)"
+      store_form:
+        company_field:
+          description: Muestra el campo de empresa en el formulario de dirección en Mi cuenta y en el paso de dirección de pago.
+          label: Mostrar campo de empresa
+        customer_support_email_help: Este correo es visible para los visitantes en el pie de página
+        new_order_notifications_email_help: Para recibir notificaciones de nuevos pedidos, introduce un correo aquí
+      store_setup_tasks:
+        add_billing_address: Añadir dirección de facturación
+        add_products: Añadir productos
+        payment_methods:
+          copy: Para aceptar pagos, configura al menos un proveedor de pago en línea.
+          done: ¡Todo listo! Puedes administrar los métodos de pago en <a href="%{link}" data-turbo-frame="_top">esta página</a>.
+          setup: Configurar métodos de pago
+          title: Configura métodos de pago para tu tienda
+        set_customer_support_email: Establecer correo de soporte al cliente
+        setup_taxes_collection: Configurar recolección de impuestos
+        taxes:
+          copy: Para cobrar impuestos, configura tus tasas impositivas.
+          done: ¡Todo listo! Puedes administrar los impuestos en la <a href="%{link}" data-turbo-frame="_top">configuración</a>.
+          setup: Configurar tasas impositivas
+      storefront: Tienda
+      successful: Éxito
+      successfully_reset_digital_links_limit: Límites de descarga restablecidos
+      taxon_rules:
+        all_conditions: todas las condiciones
+        any_condition: cualquier condición
+        available_on: Disponible en
+        match_policies:
+          contains: contiene
+          does_not_contain: no contiene
+          is_equal_to: es igual a
+          is_not_equal_to: no es igual a
+        on_sale: En oferta
+        products_must_match: 'Los productos deben cumplir:'
+        tag: Etiqueta del producto
+      taxon_type: Tipo de taxón
+      taxon_types:
+        automatic: Automático
+        automatic_info: Añade productos automáticamente si cumplen las reglas establecidas.
+        manual: Manual
+        manual_info: Gestiona los productos manualmente. Puedes añadirlos o eliminarlos en lote.
+      upload_new_asset: Subir nuevo recurso
+      user:
+        last_order_placed: Último pedido realizado
+        no_store_credit: El cliente no tiene crédito disponible
+      users:
+        filters:
+          search_placeholder: Buscar clientes por correo o nombre
+      utilities:
+        preview: Vista previa
+      variants:
+        search_results:
+          no_variants: No se encontraron variantes que coincidan con tu búsqueda :(
+      variants_form:
+        add_option:
+          empty: Añadir opciones como talla o color
+          not_empty: Añadir otra opción
+        compare_at_price_description: Este precio se usa para mostrar descuentos en la página del producto.
+        stock_locations_link: Para añadir más ubicaciones de stock, ve a <a href="%{link}">Ubicaciones de stock</a>
+        total_inventory_html: 'Inventario total en %{stock_location}: %{count} disponibles'
+      webhooks_subscribers:
+        all_events: Todos los eventos
+        new_webhooks_subscriber: Nuevo suscriptor de Webhooks
+        no_events: Sin eventos
+        select_events: Seleccionar eventos
+        subscribe_to_all_events: Suscribirse a todos los eventos
+        subscriptions: Suscripciones
+        time_of_last_event: Hora del último evento
+        webhooks_events: Eventos de Webhooks

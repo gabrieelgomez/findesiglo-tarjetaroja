@@ -1,0 +1,35 @@
+<div class="card mb-4">
+  <div class="card-body">
+    <div class="form-group">
+      <%= f.label :name, Spree.t(:name) %>
+      <%= f.text_field :name, class: 'form-control', required: true, autofocus: f.object.new_record?, data: { seo_form_target: 'sourceTitleInput', slug_form_target: :name, action: 'slug-form#updateUrlFromName' } %>
+      <%= f.error_message_on :name %>
+    </div>
+
+    <div class="form-group mb-0">
+      <%= f.label :description, Spree.t(:description) %>
+      <div class="trix-container mb-0">
+        <%= f.text_area :description, { rows: 10, class: "form-control spree-rte", data: { seo_form_target: 'sourceDescriptionInput' } } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title">Precio BCV</h5>
+  </div>
+  <div class="card-body">
+    <div class="form-group mb-0">
+      <%= f.label :price_bcv, 'Precio BCV Dolares' %>
+      <div class="input-group">
+        <%= f.number_field :price_bcv, class: 'form-control', step: '0.01', min: '0', placeholder: '0.00', required: true %>
+        <div class="input-group-append">
+          <span class="input-group-text">$</span>
+        </div>
+      </div>
+      <small class="form-text text-muted">Precio en dolares BCV</small>
+      <%= f.error_message_on :price_bcv %>
+    </div>
+  </div>
+</div>

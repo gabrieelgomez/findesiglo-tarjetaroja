@@ -1,0 +1,248 @@
+<%
+  # Detectar si hay un pago con método "Pagomovil"
+  has_pagomovil = @order&.payments&.any? { |p| p.payment_method&.name == "Pagomovil" }
+  bcv_rate = has_pagomovil ? (Bcv.last&.value_whatsapp || 1) : nil
+  currency_symbol = has_pagomovil ? "Bs" : "$"
+  
+  # Helper para convertir y formatear precios
+  format_price_for_invoice = ->(amount) {
+    return "#{currency_symbol} 0.00" if amount.nil?
+    converted = has_pagomovil ? (amount.to_f * bcv_rate) : amount.to_f
+    "#{currency_symbol} #{'%.2f' % converted}"
+  }
+%>
+
+<div class="address-image-container-a4" id="address-image-container-a4">
+  <div class="address-card-a4" style="background: white; width: 210mm; min-height: 297mm; font-family: 'Arial', 'Helvetica', sans-serif; padding: 15mm; box-sizing: border-box; margin: 0 auto; color: #333;">
+    
+    <!-- Header Section -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+      <!-- Left: Bill To -->
+      <div style="flex: 1;">
+        <div style="color: #666; font-size: 14px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+          Nota de entrega:
+        </div>
+        <div style="color: #333; font-size: 15px; line-height: 1.6;">
+          <div style="font-weight: 600; margin-bottom: 4px;"><%= @address.full_name.present? ? @address.full_name.titleize : "N/A" %></div>
+
+          <% if @address.agency.present? %>
+            <div style="color: #666;">Agencia: <%= @address.agency %></div>
+          <% end %>
+
+          <div style="color: #666;"><%= @address.address1 %></div>
+          <% if @address.address2.present? %>
+            <div style="color: #666;"><%= @address.address2 %></div>
+          <% end %>
+          <div style="color: #666;">
+            <%= @address.city %><% if @address.state_text.present? %>, <%= @address.state_text %><% end %> <%= @address.zipcode %>
+          </div>
+          <% if @address.phone.present? %>
+            <div style="color: #666; margin-top: 4px;">Tel: <%= @address.phone %></div>
+          <% end %>
+          <% if @address.identifier.present? %>
+            <div style="color: #666;">Cédula: <%= @address.identifier %></div>
+          <% end %>
+        </div>
+      </div>
+      
+      <!-- Right: Company Info -->
+      <div style="flex: 1; text-align: right; padding-left: 20px; border-left: 1px solid #e0e0e0;">
+        <div style="display: flex; align-items: center; justify-content: flex-end; margin-bottom: 15px;">
+          <div style="background: white; border-radius: 4px; padding: 4px; margin-right: 10px;">
+            <img src="/assets/logo_tarjeta_roja.png" alt="Tarjeta Roja" style="height: 50px; width: auto; max-width: 50px; object-fit: contain;">
+          </div>
+          <div style="font-size: 20px; font-weight: 700;">Tarjeta Roja</div>
+        </div>
+        <div style="color: #666; font-size: 13px; line-height: 1.6; margin-bottom: 15px; text-align: right;">
+          <div>C.C. Metroplaza Local PB-56</div>
+          <div>San Diego, Valencia, Edo. Carabobo, Venezuela</div>
+          <div style="margin-top: 4px;"><strong>RIF:</strong> J-501063761</div>
+        </div>
+        <div style="margin-top: 20px; font-size: 13px;">
+          <div style="color: #666; font-size: 13px; margin-bottom: 4px;">
+            <strong>Invoice #:</strong> <span style="color: #333;"><%= @order&.number || "N/A" %></span>
+          </div>
+          <div style="color: #666; font-size: 13px; margin-bottom: 4px;">
+            <strong>Date:</strong> <span style="color: #333;"><%= @order&.completed_at&.strftime("%d/%m/%Y") || Date.current.strftime("%d/%m/%Y") %></span>
+          </div>
+          <div style="color: #666; font-size: 13px;">
+            <strong>Total Artículos:</strong> <span style="color: #333;"><%= @order&.line_items&.sum(&:quantity) || 0 %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Invoice Title -->
+    
+    <!-- Products Table -->
+    <% if @order&.line_items&.any? %>
+      <div style="margin-bottom: 30px;">
+        <!-- Table Header -->
+        <div style="background: #f5f5f5; padding: 12px 15px; display: flex; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 2px solid #e0e0e0;">
+          <div style="flex: 3; padding-right: 10px;">DESCRIPCIÓN DEL PRODUCTO</div>
+          <div style="flex: 1; text-align: right; padding-right: 10px;">Precio (<%= currency_symbol %>)</div>
+          <div style="flex: 0.8; text-align: center; padding-right: 10px;">Cantidad</div>
+          <div style="flex: 1; text-align: right;">TOTAL (<%= currency_symbol %>)</div>
+        </div>
+        
+        <!-- Table Rows -->
+        <% @order.line_items.each do |line_item| %>
+          <div style="padding: 15px; display: flex; align-items: center; border-bottom: 1px solid #f0f0f0;">
+            <!-- Product Description with Image -->
+            <div style="flex: 3; padding-right: 10px; display: flex; align-items: center;">
+              <div style="margin-right: 12px; flex-shrink: 0;">
+                <% image = line_item.variant.default_image %>
+                <% if image.present? && image.attached? && image.variable? %>
+                  <% begin %>
+                    <% image_url = image.url rescue nil %>
+                    <% if image_url %>
+                      <img src="<%= main_app.url_for(image_url) %>" alt="<%= line_item.name %>" style="width: 60px; height: 60px; object-fit: contain; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;">
+                    <% else %>
+                      <%= spree_image_tag(image, width: 60, height: 60, style: "width: 60px; height: 60px; object-fit: contain; border: 1px solid #e0e0e0; border-radius: 4px; background: #fff;") %>
+                    <% end %>
+                  <% rescue => e %>
+                    <div style="width: 60px; height: 60px; background: #f0f0f0; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 8px; text-align: center;">
+                      Sin imagen
+                    </div>
+                  <% end %>
+                <% else %>
+                  <div style="width: 60px; height: 60px; background: #f0f0f0; border: 1px solid #e0e0e0; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #999; font-size: 8px; text-align: center;">
+                    Sin imagen
+                  </div>
+                <% end %>
+              </div>
+              <div>
+                <div style="font-weight: 600; font-size: 12px; color: #333; margin-bottom: 4px;">
+                  <%= line_item.name %>
+                </div>
+                <% if line_item.options_text.present? %>
+                  <div style="font-size: 10px; color: #666; margin-top: 2px;">
+                    <%= line_item.options_text %>
+                  </div>
+                <% end %>
+                <% if line_item.variant.sku.present? %>
+                  <div style="font-size: 9px; color: #999; margin-top: 2px;">
+                    SKU: <%= line_item.variant.sku %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+            
+            <!-- Price -->
+            <div style="flex: 1; text-align: right; padding-right: 10px; font-size: 11px; color: #333;">
+              <%= has_pagomovil ? format_price_for_invoice.call(line_item.price) : line_item.single_display_amount %>
+            </div>
+            
+            <!-- Quantity -->
+            <div style="flex: 0.8; text-align: center; padding-right: 10px; font-size: 11px; color: #333;">
+              <%= line_item.quantity %>
+            </div>
+            
+            <!-- Total -->
+            <div style="flex: 1; text-align: right; font-size: 11px; font-weight: 600; color: #333;">
+              <%= has_pagomovil ? format_price_for_invoice.call(line_item.amount) : line_item.display_amount %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+    
+    <!-- Payment Section -->
+    <% if @order&.payments&.any? %>
+      <% completed_payments = @order.payments.where(state: 'completed') %>
+      <% if completed_payments.any? %>
+        <div style="margin-bottom: 30px; margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+          <div style="color: #666; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 0.5px;">
+            Información de Pagos
+          </div>
+          <div style="background: #f9fafb; padding: 15px; border-radius: 4px;">
+            <!-- Payment Header -->
+            <div style="background: #f5f5f5; padding: 10px 15px; display: flex; font-weight: 600; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; border-bottom: 2px solid #e0e0e0; margin: -15px -15px 15px -15px; border-radius: 4px 4px 0 0;">
+              <div style="flex: 2; padding-right: 10px;">Método de Pago</div>
+              <div style="flex: 1; text-align: right; padding-right: 10px;">Fecha</div>
+              <div style="flex: 1; text-align: right;">Monto (<%= currency_symbol %>)</div>
+            </div>
+            
+            <!-- Payment Rows -->
+            <% completed_payments.order(created_at: :asc).each do |payment| %>
+              <div style="padding: 12px 0; display: flex; align-items: center; border-bottom: 1px solid #f0f0f0;">
+                <div style="flex: 2; padding-right: 10px; font-size: 11px; color: #333;">
+                  <%= payment.payment_method&.name || "N/A" %>
+                </div>
+                <div style="flex: 1; text-align: right; padding-right: 10px; font-size: 11px; color: #666;">
+                  <%= payment.created_at&.strftime("%d/%m/%Y") || "N/A" %>
+                </div>
+                <div style="flex: 1; text-align: right; font-size: 11px; font-weight: 600; color: #333;">
+                  <%= has_pagomovil ? format_price_for_invoice.call(payment.amount) : payment.display_amount %>
+                </div>
+              </div>
+            <% end %>
+            
+            <!-- Payment Total -->
+            <% total_paid = completed_payments.sum(&:amount) %>
+            <% if total_paid > 0 %>
+              <div style="border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between;">
+                <span style="color: #333; font-size: 12px; font-weight: 700;">Total Pagado:</span>
+                <span style="color: #333; font-size: 12px; font-weight: 700;"><%= has_pagomovil ? format_price_for_invoice.call(total_paid) : Spree::Money.new(total_paid, { currency: @order.currency || 'USD' }).to_s %></span>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    <% end %>
+    
+    <!-- Footer Section -->
+    <div style="display: flex; justify-content: space-between; margin-top: 40px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
+      <!-- Left: Comments -->
+      <div style="flex: 1; padding-right: 30px;">
+        <div style="color: #666; font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 10px; letter-spacing: 0.5px;">
+          Comentarios
+        </div>
+        <div style="color: #666; font-size: 10px; line-height: 1.6;">
+          <div style="margin-bottom: 8px;">
+            <%= @order.special_instructions %>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right: Summary -->
+      <div style="flex: 1; max-width: 250px;">
+        <div style="background: #f9fafb; padding: 15px; border-radius: 4px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
+            <span style="color: #666; font-weight: 600;">Total Artículos:</span>
+            <span style="color: #333; font-weight: 600;"><%= @order&.line_items&.sum(&:quantity) || 0 %></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
+            <span style="color: #666; font-weight: 600;">Subtotal:</span>
+            <span style="color: #333; font-weight: 600;"><%= has_pagomovil ? format_price_for_invoice.call(@order&.item_total) : (@order&.display_item_total || "$0.00") %></span>
+          </div>
+          
+          <% if @order&.all_adjustments&.eligible&.any? %>
+            <% @order.all_adjustments.eligible.each do |adjustment| %>
+              <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
+                <span style="color: #666;"><%= adjustment.label %>:</span>
+                <span style="color: #333;"><%= has_pagomovil ? format_price_for_invoice.call(adjustment.amount) : adjustment.display_amount %></span>
+              </div>
+            <% end %>
+          <% else %>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
+              <span style="color: #666;">Descuento:</span>
+              <span style="color: #333;"><%= "#{currency_symbol} 0.00" %></span>
+            </div>
+          <% end %>
+          
+          <div style="border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between;">
+            <span style="color: #333; font-size: 13px; font-weight: 700;">Total:</span>
+            <span style="color: #333; font-size: 13px; font-weight: 700;"><%= has_pagomovil ? format_price_for_invoice.call(@order&.total) : (@order&.display_total || "$0.00") %></span>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Footer -->
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #f0f0f0; text-align: center; color: #999; font-size: 15px;">
+      <div>Generado el <%= Date.current.strftime("%d/%m/%Y") %> | Orden #<%= @order&.number || "N/A" %></div>
+    </div>
+    
+  </div>
+</div>

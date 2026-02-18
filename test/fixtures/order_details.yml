@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  description: MyText
+  description_short: MyString
+  operator: 1
+  type_service: 1
+  delivery_time: 2025-08-24 17:56:22
+  spree_order_number: MyString
+  order: one
+
+two:
+  description: MyText
+  description_short: MyString
+  operator: 1
+  type_service: 1
+  delivery_time: 2025-08-24 17:56:22
+  spree_order_number: MyString
+  order: two

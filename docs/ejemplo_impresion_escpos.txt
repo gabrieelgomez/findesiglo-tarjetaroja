@@ -1,0 +1,66 @@
+================================================
+ EJEMPLO TICKET ESC/POS - Papel 80mm (48 chars)
+================================================
+
+
+      ENVIO - TARJETA ROJA
+        MERCADO CENTRAL
+
+
+DESTINATARIO
+Maria Garcia Lopez
+
+CEDULA
+V-12345678
+
+TELEFONO
+0424-1234567
+
+----------------------------------------------
+
+DIRECCION DE ENTREGA
+Calle Principal entre 5ta y 6ta
+Casa 45, Residencia Los Pinos
+
+CIUDAD
+CARACAS
+
+----------------------------------------------
+
+COMENTARIOS
+Entregar en la mañana, tocar timbre 2
+veces
+
+----------------------------------------------
+
+ARTICULOS COMPRADOS
+Total: 3 articulos
+
+CAMISETA ROJA TALLA M
+Cantidad: 2
+
+GORRA NEGRA
+Cantidad: 1
+
+----------------------------------------------
+
+AGENCIA
+MERCADO CENTRAL
+
+ESTADO
+DISTRITO CAPITAL
+
+----------------------------------------------
+
+Generado: 17/02/2025
+#ORD-R123456789
+
+
+  >>> [corte parcial del papel] <<<
+
+================================================
+NOTAS:
+- Título y agencia: letra doble tamaño (grande).
+- Separador: 48 guiones.
+- Líneas largas se parten automáticamente.
+================================================

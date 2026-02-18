@@ -1,0 +1,168 @@
+<div class="address-image-container" id="address-image-container">
+  <div class="address-card" style="background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); width: 500px; font-family: Arial, sans-serif; overflow: hidden;">
+    
+    <!-- Header Rojo -->
+    <div style="background: linear-gradient(135deg, #c0392b 0%, #e74c3c 100%); padding: 15px 20px; color: white;">
+      <div style="display: flex; align-items: center; justify-content: space-between;">
+        <div style="display: flex; align-items: center;">
+          <div style="background: white; border-radius: 6px; padding: 2px; margin-right: 12px;">
+            <img src="/assets/logo_tarjeta_roja.png" alt="Tarjeta Roja" style="height: 100px; width: auto; max-width: 70px; object-fit: contain;">
+          </div>
+          <div>
+            <h2 style="margin: 0; font-size: 36px; font-weight: bold; text-transform: uppercase;">ENVÍO</h2>
+            <p style="margin: 3px 0 0 0; font-size: 52px; opacity: 0.9;">Tarjeta Roja</p>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 32px; font-weight: bold; text-transform: uppercase;"><%= @address&.agency %></div>
+          <div style="font-size: 18px; opacity: 0.9; text-transform: uppercase;">--</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Cuerpo Principal -->
+    <div style="padding: 20px;">
+      
+      <!-- Información del Destinatario -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">👤</span>
+          </div>
+          <div>
+            <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">DESTINATARIO</div>
+            <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.full_name.present? ? @address.full_name.titleize : "N/A" %></div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">🆔</span>
+          </div>
+          <div>
+            <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">CÉDULA</div>
+            <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.identifier.present? ? @address.identifier : "N/A" %></div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">📞</span>
+          </div>
+          <div>
+            <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">TELÉFONO</div>
+            <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.phone.present? ? @address.phone : "N/A" %></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Línea Separadora -->
+      <div style="height: 1px; background: #ecf0f1; margin: 15px 0;"></div>
+      
+      <!-- Dirección de Entrega -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: flex-start; margin-bottom: 12px;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px; flex-shrink: 0;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">📍</span>
+          </div>
+          <div style="flex: 1;">
+            <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">DIRECCIÓN DE ENTREGA</div>
+            <div style="color: #2c3e50; font-size: 30px; font-weight: bold; line-height: 1.3;">
+              <%= @address.address1 %>
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; align-items: center;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">🏢</span>
+          </div>
+          <div>
+            <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">CIUDAD</div>
+            <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.city.present? ? @address.city.upcase : "N/A" %></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Línea Separadora -->
+      <div style="height: 1px; background: #ecf0f1; margin: 15px 0;"></div>
+
+      <!-- Comentarios -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+            <span style="color: white; font-size: 36px; font-weight: bold;">📝</span>
+          </div>
+        </div>
+        <div>
+          <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">COMENTARIOS</div>
+          <div style="color: #2c3e50; font-size: 32px; font-weight: bold;"><%= @order.special_instructions.present? ? @order.special_instructions : "N/A" %></div>
+        </div>
+      </div>
+
+      <!-- Línea Separadora -->
+      <div style="height: 1px; background: #ecf0f1; margin: 15px 0;"></div>
+      
+      <!-- Artículos Comprados -->
+      <% if @order&.line_items&.any? %>
+        <div style="margin-bottom: 20px;">
+          <div style="display: flex; align-items: center; margin-bottom: 12px;">
+            <div style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+              <span style="color: white; font-size: 36px; font-weight: bold;">🛍️</span>
+            </div>
+            <div>
+              <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">ARTÍCULOS COMPRADOS</div>
+              <div style="color: #e74c3c; font-size: 24px; font-weight: bold; margin-top: 4px;">
+                Total: <%= @order.line_items.sum(&:quantity) %> artículos
+              </div>
+            </div>
+          </div>
+          
+          <% @order.line_items.each do |line_item| %>
+            <div style="background: #f8f9fa; border-radius: 6px; padding: 12px; margin-bottom: 8px;">
+              <div style="color: #2c3e50; font-size: 24px; font-weight: bold; margin-bottom: 4px;">
+                <%= line_item.name.upcase %>
+              </div>
+              <div style="color: #7f8c8d; font-size: 20px; margin-bottom: 4px;">
+                <% if line_item.options_text.present? %>
+                  <%= line_item.options_text.upcase %>
+                <% end %>
+              </div>
+              <div style="color: #e74c3c; font-size: 22px; font-weight: bold;">
+                Cantidad: <%= line_item.quantity %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+        
+        <!-- Línea Separadora -->
+        <div style="height: 1px; background: #ecf0f1; margin: 15px 0;"></div>
+      <% end %>
+      
+      <!-- Información de Agencia y Estado -->
+      <div style="background: #f8f9fa; border-radius: 6px; padding: 12px; display: flex; justify-content: space-between;">
+        <div>
+          <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">AGENCIA</div>
+          <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.agency.present? ? @address.agency.upcase : "--" %></div>
+        </div>
+        <div>
+          <div style="color: #7f8c8d; font-size: 30px; text-transform: uppercase; font-weight: bold;">ESTADO</div>
+          <div style="color: #2c3e50; font-size: 52px; font-weight: bold;"><%= @address.state_text.present? ? @address.state_text.upcase : "N/A" %></div>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Footer -->
+    <div style="background: #ecf0f1; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center;">
+        <span style="color: #7f8c8d; font-size: 30px; margin-right: 6px;">📅</span>
+        <span style="color: #7f8c8d; font-size: 30px;">Generado el <%= Date.current.strftime("%d/%m/%Y") %></span>
+      </div>
+      <div style="color: #e74c3c; font-size: 30px; font-weight: bold;">
+        #ORD-<%= @order&.number %>
+      </div>
+    </div>
+    
+  </div>
+</div> 

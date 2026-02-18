@@ -1,0 +1,22 @@
+<div class="card mb-4">
+  <div class="card-header">
+    <h5 class="card-title">
+      <%= I18n.t('activerecord.attributes.spree/order.special_instructions') %>
+    </h5>
+  </div>
+  <div class="card-body">
+    <%= form_with url: spree.update_special_instructions_admin_order_path(@order), method: :patch, data: { turbo_frame: "_top" } do |f| %>
+      <div class="form-group">
+        <%= f.text_area :special_instructions, 
+            name: 'order[special_instructions]',
+            value: @order.special_instructions,
+            class: 'form-control', 
+            rows: 4,
+            placeholder: Spree.t('storefront.checkout.special_instructions_placeholder', default: 'Instrucciones especiales para esta orden...') %>
+      </div>
+      <div class="mt-2">
+        <%= f.submit Spree.t('actions.update', default: 'Actualizar'), class: 'btn btn-primary btn-sm' %>
+      </div>
+    <% end %>
+  </div>
+</div>

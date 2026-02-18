@@ -1,0 +1,2 @@
+class Bcv < ApplicationRecord
+end

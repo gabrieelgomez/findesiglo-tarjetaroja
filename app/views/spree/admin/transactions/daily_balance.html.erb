@@ -1,0 +1,280 @@
+<% content_for :page_title do %>
+  Cuadre Diario
+<% end %>
+
+<!-- Calendario Mensual -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-gradient-primary text-white">
+        <h3 class="card-title mb-0">
+          <i class="fa fa-calendar-alt mr-2"></i>
+          Calendario
+        </h3>
+      </div>
+      <div class="card-body p-0">
+        <div class="calendar-container">
+          <%= month_calendar do |date| %>
+            <%= link_to daily_balance_admin_transactions_url(q: { created_at_gt: date, created_at_lt: date }), 
+                        class: "calendar-day-link" do %>
+              <div class="calendar-day">
+                <% if date == Date.today %>
+                  <span class="badge badge-<%= @current_date == date.to_s ? 'success' : 'warning' %>">
+                    HOY <%= date.strftime('%d') %>
+                  </span>
+                <% else %>
+                  <span class="badge badge-<%= @current_date == date.to_s ? 'primary' : 'none' %>">
+                    <%= date.strftime('%d') %>
+                  </span>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Título de la fecha seleccionada -->
+<div class="row mb-3">
+  <div class="col-12">
+    <strong class="contextual-title px-0 mb-0 col">
+      <%= @current_date.present? ? @current_date.to_date.strftime("%-d de %B") : "Selecciona una fecha" %>
+    </strong>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Filtros de Fecha</h3>
+      </div>
+      <div class="card-body">
+        <div class="filters-section">
+          <%= search_form_for @search, url: daily_balance_admin_transactions_path, class: "form-inline" do |f| %>
+            <div class="form-group mr-3">
+              <label class="mr-2">Desde:</label>
+              <%= f.date_field :created_at_gt, value: params.dig(:q, :created_at_gt), class: 'form-control date-input', placeholder: 'dd/mm/yyyy' %>
+            </div>
+            <div class="form-group mr-3">
+              <label class="mr-2">Hasta:</label>
+              <%= f.date_field :created_at_lt, value: params.dig(:q, :created_at_lt), class: 'form-control date-input', placeholder: 'dd/mm/yyyy' %>
+            </div>
+            <div class="form-group mr-3">
+              <label class="mr-2">Traspaso:</label>
+              <%= select_tag 'q[traspaso_eq]', 
+                  options_for_select([
+                    ['Todos', ''],
+                    ['Solo traspasos', 'true'],
+                    ['Sin traspasos', 'false']
+                  ], params.dig(:q, :traspaso_eq)), 
+                  class: 'form-control' %>
+            </div>
+            <div class="form-group mr-3">
+              <%= f.submit 'Filtrar', class: 'btn btn-primary' %>
+            </div>
+          <% end %>
+        </div>
+
+        <% if @current_date.present? %>
+          <div class="day-navigation">
+            <%= link_to "← Día anterior", daily_balance_admin_transactions_path(q: { created_at_gt: @previous_day.to_s, created_at_lt: @previous_day.to_s }), class: 'btn btn-outline-secondary' %>
+            <span class="current-date-display">Fecha: <%= @current_date %></span>
+            <%= link_to "Día siguiente →", daily_balance_admin_transactions_path(q: { created_at_gt: @next_day.to_s, created_at_lt: @next_day.to_s }), class: 'btn btn-outline-secondary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Tabla combinada de transacciones -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Transacciones del Día</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Cliente/Descripción</th>
+                <th>Monto</th>
+                <th>Método de Pago</th>
+                <th>Camisas</th>
+                <th>Fecha y Hora</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @transactions.each do |transaction| %>
+                <tr>
+                  <td>
+                    <% if transaction.is_a?(Spree::Payment) %>
+                      <%= link_to transaction.order.bill_address&.full_name || 'Sin nombre', spree.edit_admin_order_path(transaction.order) %>
+                    <% else %>
+                      <%= transaction.description %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if transaction.is_a?(Spree::Payment) %>
+                      <span class="badge badge-success" id="transaction-<%= transaction.id %>"><%= transaction.display_amount %></span>
+                      <% if transaction.traspaso %>
+                        <small class="ml-2">(Traspaso)</small>
+                      <% end %>
+                    <% else %>
+                      <span class="badge badge-danger" id="transaction-<%= transaction.id %>"><%= transaction.amount %></span>
+                      <% if transaction.traspaso %>
+                        <small class="ml-2">(Traspaso)</small>
+                      <% end %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if transaction.is_a?(Spree::Payment) %>
+                      <%= transaction.payment_method.name %>
+                    <% else %>
+                      <%= transaction.spree_payment_method.name %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if transaction.is_a?(Spree::Payment) && transaction.order.present? %>
+                      <% shirts_count = transaction.order.line_items.sum(&:quantity) %>
+                      <% if shirts_count > 0 %>
+                        <span class="badge badge-info"><%= shirts_count %></span>
+                      <% else %>
+                        <span class="text-muted">-</span>
+                      <% end %>
+                    <% else %>
+                      <span class="text-muted">-</span>
+                    <% end %>
+                  </td>
+                  <td><span class="date-time-cell"><%= transaction.created_at.strftime('%d/%m/%y %H:%M') %></span></td>
+                </tr>
+              <% end %>
+            </tbody>
+
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Resumen del Día</h4>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-2">
+            <div class="text-center">
+              <h5>Total Ingresos</h5>
+              <h3 class="text-success"><%= Spree::Money.new(@payments.sum(&:amount)) %></h3>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-center">
+              <h5>Total Egresos</h5>
+              <h3 class="text-danger"><%= @expenses.sum(&:amount) %></h3>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-center">
+              <h5>Balance Neto</h5>
+              <% balance = @payments.sum(&:amount) - @expenses.sum(&:amount) %>
+              <h3 class="<%= balance >= 0 ? 'text-success' : 'text-danger' %>">
+                <%= Spree::Money.new(balance) %>
+              </h3>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-center">
+              <h5>Número de Transacciones</h5>
+              <h3 class="text-info"><%= @transactions.count %></h3>
+            </div>
+          </div>
+          <div class="col-md-2">
+            <div class="text-center">
+              <h5>Total Camisas Vendidas</h5>
+              <h3 class="text-primary"><%= @total_shirts_sold %></h3>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ingresos por Método de Pago -->
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Ingresos por Método de Pago</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th class="text-center">Método de Pago</th>
+                <th class="text-center">Total Ingresado</th>
+                <th class="text-center">Cantidad de Pagos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% payments_by_method = @payments.group_by(&:payment_method) %>
+              <% total_general = 0 %>
+              <% Spree::PaymentMethod.active.order(position: :asc).each do |payment_method| %>
+                <% method_payments = payments_by_method[payment_method] || [] %>
+                <% method_total = method_payments.sum(&:amount) %>
+                <% total_general += method_total %>
+                <tr>
+                  <td><%= payment_method.name %></td>
+                  <td class="amount text-center">
+                    <span class="badge badge-completed"><%= Spree::Money.new(method_total) %></span>
+                  </td>
+                  <td class="text-center">
+                    <%= method_payments.count %>
+                  </td>
+                </tr>
+              <% end %>
+              <tr>
+                <td><strong>Total General</strong></td>
+                <td class="amount text-center">
+                  <span class="badge badge-completed"><%= Spree::Money.new(total_general) %></span>
+                </td>
+                <td class="text-center">
+                  <strong><%= @payments.count %></strong>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Botón Ver sin traspasos -->
+<div class="row mt-3">
+  <div class="col-12 text-center">
+    <% if params.dig(:q, :traspaso_eq) == 'false' %>
+      <div class="alert alert-info">
+        <strong>Sin traspasos activado</strong>
+        <% current_params = request.parameters.dup %>
+        <% current_params["q"] = (current_params["q"] || {}).except(:traspaso_eq) %>
+        <%= link_to 'Ver con traspasos', daily_balance_admin_transactions_url(current_params), class: 'btn btn-outline-primary ml-3' %>
+      </div>
+    <% else %>
+      <% current_params = request.parameters.dup %>
+      <% current_params["q"] = (current_params["q"] || {}).merge({traspaso_eq: false}) %>
+      <%= link_to 'Ver sin traspasos', daily_balance_admin_transactions_url(current_params), class: 'btn btn-outline-warning' %>
+    <% end %>
+  </div>
+</div> 

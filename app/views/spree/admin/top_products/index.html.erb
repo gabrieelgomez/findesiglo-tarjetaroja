@@ -1,0 +1,137 @@
+<% content_for :page_title do %>
+  <%= I18n.t(:top_products) %>
+<% end %>
+
+<div class="row">
+  <div class="col-12">
+    <!-- Filtros de fecha y paginación -->
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="card-title mb-0">
+          <%= icon 'calendar' %>
+          <%= I18n.t(:filters) %>
+        </h5>
+      </div>
+      <div class="card-body">
+        <%= form_with url: spree.admin_top_products_path, method: :get, local: true, class: 'row g-3' do |form| %>
+          <div class="col-md-3">
+            <%= form.label :start_date, I18n.t(:start_date), class: 'form-label' %>
+            <%= form.date_field :start_date, value: @start_date, class: 'form-control' %>
+          </div>
+          <div class="col-md-3">
+            <%= form.label :end_date, I18n.t(:end_date), class: 'form-label' %>
+            <%= form.date_field :end_date, value: @end_date, class: 'form-control' %>
+          </div>
+          <div class="col-md-3">
+            <%= form.label :per_page, I18n.t(:per_page), class: 'form-label' %>
+            <%= form.select :per_page, [[10, 10], [25, 25], [50, 50], [100, 100], [200, 200]], { selected: @per_page }, class: 'form-select' %>
+          </div>
+          <div class="col-md-3 d-flex align-items-end">
+            <%= form.submit I18n.t(:filter), class: 'btn btn-primary me-2' %>
+            <%= link_to I18n.t(:reset), spree.admin_top_products_path, class: 'btn btn-outline-secondary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- Resumen de estadísticas -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title text-primary">
+              <%= icon 'box' %>
+              <%= @summary_stats[:total_units_sold] %>
+            </h5>
+            <p class="card-text"><%= I18n.t(:total_units_sold) %></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card text-center">
+          <div class="card-body">
+            <h5 class="card-title text-info">
+              <%= icon 'package' %>
+              <%= @summary_stats[:total_products] %>
+            </h5>
+            <p class="card-text"><%= I18n.t(:products_with_sales) %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de productos más vendidos -->
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="card-title mb-0">
+          <%= icon 'chart-bar' %>
+          <%= I18n.t(:top_products_ranking) %>
+        </h5>
+        <span class="text-muted">
+          <%= I18n.t(:showing) %> <%= @top_products.offset_value + 1 %>-<%= [@top_products.offset_value + @top_products.length, @top_products.total_count].min %> <%= I18n.t(:of) %> <%= @top_products.total_count %>
+        </span>
+      </div>
+      <div class="card-body">
+        <% if @top_products.any? %>
+          <div class="table-responsive">
+            <table class="table table-striped table-hover">
+              <thead>
+                <tr>
+                  <th class="text-center">#</th>
+                  <th><%= I18n.t(:product) %></th>
+                  <th class="text-center"><%= I18n.t(:quantity_sold) %></th>
+                  <th class="text-center"><%= I18n.t(:actions) %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% @top_products.each_with_index do |product, index| %>
+                  <% position = @top_products.offset_value + index + 1 %>
+                  <tr>
+                    <td class="text-center">
+                      <span class="badge bg-<%= position <= 3 ? 'warning' : 'secondary' %>">
+                        <%= position %>
+                      </span>
+                    </td>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <% if product.images.any? %>
+                          <%= image_tag product.images.first.url(:mini), class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;' %>
+                        <% end %>
+                        <div>
+                          <%= link_to product.name, spree.edit_admin_product_path(product), class: 'text-decoration-none' %>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td class="text-center">
+                      <strong class="text-primary fs-5"><%= product.total_quantity.to_i %></strong>
+                    </td>
+                    <td class="text-center">
+                      <%= link_to spree.edit_admin_product_path(product), class: 'btn btn-sm btn-outline-primary' do %>
+                        <%= icon 'pencil' %>
+                      <% end %>
+                      <%= link_to spree.admin_product_product_variants_sales_path(product), class: 'btn btn-sm btn-outline-info', title: I18n.t(:variants_sales_report) do %>
+                        <%= icon 'chart-bar' %>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Paginación -->
+          <div class="d-flex justify-content-center mt-4">
+            <%= paginate @top_products, params: { start_date: @start_date, end_date: @end_date, per_page: @per_page } %>
+          </div>
+        <% else %>
+          <div class="text-center py-5">
+            <%= icon 'inbox', class: 'text-muted', style: 'font-size: 3rem;' %>
+            <h5 class="mt-3 text-muted"><%= I18n.t(:no_products_sold) %></h5>
+            <p class="text-muted"><%= I18n.t(:no_products_sold_description) %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,246 @@
+<% content_for :page_title do %>
+  <%= t('balance.title') %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= button_link_to t('balance.new_expense'),
+    spree.new_admin_expense_path,
+    class: "btn-danger",
+      icon: 'add.svg' %>
+<% end if can? :create, Expense %>
+
+<!-- Filtros de Fecha -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Filtros de Fecha</h3>
+      </div>
+      <div class="card-body">
+        <div class="filters-section">
+          <%= search_form_for @search, url: admin_transactions_path, class: "form-inline" do |f| %>
+            <div class="form-group mr-3">
+              <label class="mr-2">Desde:</label>
+              <%= f.date_field :created_at_gt, value: params.dig(:q, :created_at_gt), class: 'form-control date-input', placeholder: 'dd/mm/yyyy' %>
+            </div>
+            <div class="form-group mr-3">
+              <label class="mr-2">Hasta:</label>
+              <%= f.date_field :created_at_lt, value: params.dig(:q, :created_at_lt), class: 'form-control date-input', placeholder: 'dd/mm/yyyy' %>
+            </div>
+            <div class="form-group mr-3">
+              <label class="mr-2">Traspaso:</label>
+              <%= select_tag 'q[traspaso_eq]', 
+                  options_for_select([
+                    ['Todos', ''],
+                    ['Solo traspasos', 'true'],
+                    ['Sin traspasos', 'false']
+                  ], params.dig(:q, :traspaso_eq)), 
+                  class: 'form-control' %>
+            </div>
+            <div class="form-group mr-3">
+              <%= f.submit 'Filtrar', class: 'btn btn-primary' %>
+            </div>
+            <div class="form-group mr-3">
+              <%= link_to 'Limpiar', admin_transactions_path, class: 'btn btn-secondary' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtros de Tipo de Transacción -->
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="d-flex flex-wrap gap-2">
+      <%= link_to admin_transactions_path(params.except(:q).to_unsafe_h.merge(q: params[:q]&.except(:transaction_type)&.to_unsafe_h || {})), 
+          class: "btn btn-sm px-4 py-2 rounded-pill text-decoration-none transition-all duration-200 #{'bg-primary text-white shadow-sm' if params.dig(:q, :transaction_type).blank?} #{'bg-light text-primary border border-primary' if params.dig(:q, :transaction_type).present?}" do %>
+        <i class="fa fa-list me-2"></i>
+        Todas las transacciones
+      <% end %>
+      <%= link_to admin_transactions_path(params.except(:q).to_unsafe_h.merge(q: (params[:q]&.to_unsafe_h || {}).merge(transaction_type: 'ingresos'))), 
+          class: "btn btn-sm px-4 py-2 rounded-pill text-decoration-none transition-all duration-200 #{'bg-success text-white shadow-sm' if params.dig(:q, :transaction_type) == 'ingresos'} #{'bg-light text-success border border-success' if params.dig(:q, :transaction_type) != 'ingresos'}" do %>
+        <i class="fa fa-arrow-up me-2"></i>
+        Solo Ingresos
+      <% end %>
+      <%= link_to admin_transactions_path(params.except(:q).to_unsafe_h.merge(q: (params[:q]&.to_unsafe_h || {}).merge(transaction_type: 'egresos'))), 
+          class: "btn btn-sm px-4 py-2 rounded-pill text-decoration-none transition-all duration-200 #{'bg-danger text-white shadow-sm' if params.dig(:q, :transaction_type) == 'egresos'} #{'bg-light text-danger border border-danger' if params.dig(:q, :transaction_type) != 'egresos'}" do %>
+        <i class="fa fa-arrow-down me-2"></i>
+        Solo Egresos
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<strong class="contextual-title px-0 mb-0 col">
+  <%= t('balance.balances') %>
+</strong>
+
+<div class="table-responsive">
+  <table class="table table-bordered" id='transactions' >
+    <thead>
+      <tr data-hook="transactions_header">
+        <th class="actions text-center"><%= t('balance.payment_method') %></th>
+        <th class="text-center"><%= t('balance.current_balance') %></th>
+      </tr>
+    </thead>
+    <tbody>
+    <% total_profit = 0 %>
+    <% total_profit_sin_inversiones = 0 %>
+    <% Spree::PaymentMethod.active.order(position: :asc).each do |payment_method| %>
+      <tr>
+        <td><%= payment_method.name %></td>
+          <td class="amount text-center">
+            <% total_sales = Spree::Money.new(payment_method.payments.joins(:order).where(state: 'completed', spree_orders: { store_id: current_store.id }).pluck(:amount).sum) %>
+            <% total_sales_money = Spree::Money.new(total_sales, { currency: 'USD' }).money.fractional/100.to_f %>
+            <% total_expenses = payment_method.expenses.where(state: 'paid', store_id: current_store.id).pluck(:amount).sum %>
+            <% total = total_sales_money - total_expenses %>
+            <% total_profit += total %>
+            <% total_profit_sin_inversiones += total unless payment_method.name == "Inversiones y Deudas" %>
+            <span class="badge badge-completed"><%= Spree::Money.new(total, { currency: 'USD' }) %></span>
+        </td>
+      </tr>
+    <% end %>
+
+      <tr>
+        <td><strong><%= t('balance.total_profit') %></strong></td>
+          <td class="amount text-center">
+            <span class="badge badge-completed"><%= Spree::Money.new(total_profit, { currency: 'USD' }) %></span>
+        </td>
+      </tr>
+
+      <tr>
+        <td><strong>Utilidad Operativa <small class="text-muted">(Sin Inversiones y Deudas)</small></strong></td>
+          <td class="amount text-center">
+            <span class="badge badge-success"><%= Spree::Money.new(total_profit_sin_inversiones, { currency: 'USD' }) %></span>
+        </td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>
+
+<hr>
+
+<div class="table-responsive">
+  <table class="table table-bordered" id='transactions' >
+    <thead>
+      <tr data-hook="transactions_header">
+        <th class="text-center"><%= t('balance.payment_state') %></th>
+        <th><%= t('balance.description') %></th>
+        <th class="text-center"><%= t('balance.date') %></th>
+        <th class="text-center"><%= t('balance.payment_method') %></th>
+        <th class="text-center"><%= t('balance.amount') %></th>
+        <th><%= t('balance.payment_reference') %></th>
+        <th class="actions text-center"><%= t('balance.actions') %></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% @transactions.each do |transaction| %>
+        <% if transaction.is_a?(Spree::Payment) %>
+          <tr id="<%= dom_id(transaction) %>" data-hook="transactions_row" data-number="<%= transaction.number %>">
+            <td class="text-center">
+              <span class="badge badge-<%= transaction.state %>">
+                <%= Spree.t(transaction.state, scope: :payment_states, default: transaction.state.capitalize) %>
+              </span>
+            </td>
+
+            <td><%= link_to "#{transaction&.order&.bill_address&.full_name&.titleize || 'Sin nombre'}", spree.edit_admin_order_path(transaction.order) %></td>
+
+            <td>
+              <span class="text-muted small-text semi-bold">
+                <%= transaction.created_at.strftime('%d/%m/%Y %H:%M')%>  
+                <i class="fa fa-clock mx-2"></i>
+              </span>
+              <br>
+              <span class="text-muted small-text">
+                <%= t('time.ago') %>
+                <%= time_ago_in_words(transaction.created_at) %>
+              </span>
+            </td>
+
+            <td class="text-center"><%= payment_method_name(transaction) %></td>
+
+                <td class="amount text-center">
+                  <span class="badge badge-completed">
+                    <span><%= transaction.display_amount %></span>
+                  </span>
+
+                  <% if transaction.monto_bolivares.present? && transaction.monto_bolivares.positive? %>
+                    <br>
+
+                    <span class="badge badge-completed">
+                      <span>Bs <%= transaction.monto_bolivares %></span>
+                    </span>
+                  <% end %>
+
+                  <% if transaction.traspaso %>
+                    <small class="ml-2">(Traspaso)</small>
+                  <% end %>
+
+                </td>
+
+            <td>
+              <span> <%= transaction.referencia || '-' %> </span>
+            </td>
+
+            <td class="actions">
+              <span class="d-flex justify-content-center transaction-action-buttons">
+                <%= link_to_with_icon('edit.svg', t('balance.edit_order'), spree.edit_admin_order_path(transaction.order),
+                class: 'btn btn-success btn-sm icon-link with-tip', no_text: true, data: { action: 'edit' })%>
+              </span>
+            </td>
+          </tr>
+
+        <% elsif transaction.is_a?(Expense)%>
+          <tr id="<%= dom_id(transaction) %>" data-hook="transactions_row" data-number="<%= transaction.id %>">
+            <td class="text-center">
+              <span class="badge badge-<%= transaction.state %>">
+                <%= Spree.t(transaction.state, scope: :payment_states, default: transaction.state.capitalize) %>
+              </span>
+            </td>
+
+            <td> <%= transaction.description.capitalize%> </td>
+
+            <td>
+              <span class="text-muted small-text semi-bold">
+                <%= transaction.created_at.strftime('%d/%m/%Y %H:%M')%>  
+                <i class="fa fa-clock mx-2"></i>
+              </span>
+              <br>
+              <span class="text-muted small-text">
+                <%= t('time.ago') %>
+                <%= time_ago_in_words(transaction.created_at) %>
+              </span>
+            </td>
+
+            <td class="text-center"><%= link_to transaction.spree_payment_method.name, spree.admin_payment_method_path(transaction.spree_payment_method) %></td>
+
+            <td class="amount text-center">
+              <span class="badge badge-danger"><%= transaction.amount %></span>
+              <% if transaction.traspaso %>
+                <small class="ml-2">(Traspaso)</small>
+              <% end %>
+            </td>
+
+            <td>
+              <span> </span>
+            </td>
+
+            <td class="actions">
+              <span class="d-flex justify-content-center transaction-action-buttons">
+                <%= link_to_with_icon('delete.svg', t('forms.delete'), spree.admin_expense_path(transaction),
+                class: 'btn btn-danger btn-sm icon-link with-tip', data: { turbo_method: :delete, turbo_confirm: t('messages.sure_delete') }, no_text: true) %>
+              </span>
+            </td>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+
+  <%= paginate @transactions %>
+</div>

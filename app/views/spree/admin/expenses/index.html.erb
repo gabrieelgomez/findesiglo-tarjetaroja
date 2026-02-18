@@ -1,0 +1,113 @@
+<% content_for :page_title do %>
+  Gastos
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= button_link_to 'Nuevo Gasto', spree.new_admin_expense_path, class: "btn-success", icon: 'add.svg' %>
+<% end %>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Filtros</h3>
+      </div>
+      <div class="card-body">
+        <%= search_form_for @search, url: spree.admin_expenses_path, class: "form-inline" do |f| %>
+          <div class="form-group mr-3">
+            <label class="mr-2">Estado:</label>
+            <%= f.select :state_eq, options_for_select([['Todos', ''], ['Pendiente', 'pending'], ['Pagado', 'paid'], ['Cancelado', 'canceled'], ['Devuelto', 'returned']], params.dig(:q, :state_eq)), {}, { class: 'form-control' } %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Método de Pago:</label>
+            <%= f.collection_select :spree_payment_method_id_eq, Spree::PaymentMethod.where(active: true), :id, :name, { prompt: 'Todos' }, { class: 'form-control' } %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Traspaso:</label>
+            <%= f.select :traspaso_eq, options_for_select([['Todos', ''], ['Sí', true], ['No', false]], params.dig(:q, :traspaso_eq)), {}, { class: 'form-control' } %>
+          </div>
+          <div class="form-group mr-3">
+            <%= f.submit 'Filtrar', class: 'btn btn-primary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Lista de Gastos</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+                <th>Estado</th>
+                <th>Método de Pago</th>
+                <th>Traspaso</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @expenses.each do |expense| %>
+                <tr>
+                  <td><%= expense.id %></td>
+                  <td><%= expense.description %></td>
+                  <td><span class="badge badge-danger"><%= expense.amount %></span></td>
+                  <td>
+                    <span class="badge badge-<%= case expense.state
+                                                  when 'pending' then 'warning'
+                                                  when 'paid' then 'success'
+                                                  when 'canceled' then 'danger'
+                                                  when 'returned' then 'info'
+                                                  else 'secondary'
+                                                  end %>">
+                      <%= expense.state.humanize %>
+                    </span>
+                  </td>
+                  <td><%= expense.spree_payment_method.name %></td>
+                  <td>
+                    <% if expense.traspaso %>
+                      <span class="badge badge-info">Sí</span>
+                    <% else %>
+                      <span class="badge badge-secondary">No</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <span class="text-muted small-text semi-bold">
+                      <%= expense.created_at.strftime('%d/%m/%Y %H:%M')%>  
+                      <i class="fa fa-clock mx-2"></i>
+                    </span>
+                    <br>
+                    <span class="text-muted small-text">
+                      Hace
+                      <%= time_ago_in_words(expense.created_at) %>
+                    </span>
+                  </td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <%= link_to 'Ver', spree.admin_expense_path(expense), class: 'btn btn-sm btn-info' %>
+                      <%= link_to 'Editar', spree.edit_admin_expense_path(expense), class: 'btn btn-sm btn-warning' %>
+                      <%= link_to 'Borrar', spree.admin_expense_path(expense), method: :delete, class: 'btn btn-sm btn-danger', 
+                          data: { confirm: '¿Estás seguro de borrar este gasto? Esta acción no se puede deshacer.' } %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+
+        <%= paginate @expenses %>
+      </div>
+    </div>
+  </div>
+</div> 

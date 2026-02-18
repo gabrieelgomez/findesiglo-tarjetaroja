@@ -1,0 +1,91 @@
+<% content_for :page_title do %>
+  Gasto #<%= @expense.id %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= button_link_to 'Editar', spree.edit_admin_expense_path(@expense), class: "btn-warning", icon: 'edit.svg' %>
+  <%= button_link_to 'Borrar', spree.admin_expense_path(@expense), class: "btn-danger", icon: 'delete.svg', method: :delete, data: { confirm: '¿Estás seguro de borrar este gasto?' } %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Detalles del Gasto</h3>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-6">
+            <dl>
+              <dt>ID:</dt>
+              <dd><%= @expense.id %></dd>
+              
+              <dt>Descripción:</dt>
+              <dd><%= @expense.description %></dd>
+              
+              <dt>Monto:</dt>
+              <dd><span class="badge badge-danger"><%= @expense.amount %></span></dd>
+            </dl>
+          </div>
+          <div class="col-md-6">
+            <dl>
+              <dt>Estado:</dt>
+              <dd>
+                <span class="badge badge-<%= case @expense.state
+                                              when 'pending' then 'warning'
+                                              when 'paid' then 'success'
+                                              when 'canceled' then 'danger'
+                                              when 'returned' then 'info'
+                                              else 'secondary'
+                                              end %>">
+                  <%= @expense.state.humanize %>
+                </span>
+              </dd>
+              
+              <dt>Método de Pago:</dt>
+              <dd><%= @expense.spree_payment_method.name %></dd>
+              
+              <dt>Balance Actual:</dt>
+              <dd><%= @expense.current_balance || 'No especificado' %></dd>
+              
+              <dt>Es Traspaso:</dt>
+              <dd><%= @expense.traspaso ? 'Sí' : 'No' %></dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Información del Sistema</h4>
+      </div>
+      <div class="card-body">
+        <dl>
+          <dt>Creado:</dt>
+          <dd><%= @expense.created_at.strftime('%d/%m/%Y %H:%M:%S') %></dd>
+          
+          <dt>Última actualización:</dt>
+          <dd><%= @expense.updated_at.strftime('%d/%m/%Y %H:%M:%S') %></dd>
+          
+          <dt>Creado por:</dt>
+          <dd><%= @expense.spree_admin_user&.email || 'N/A' %></dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mt-3">
+      <div class="card-header">
+        <h4 class="card-title">Acciones</h4>
+      </div>
+      <div class="card-body">
+        <div class="d-grid gap-2">
+          <%= link_to 'Volver al Balance', spree.admin_transactions_path, class: 'btn btn-secondary' %>
+          <%= link_to 'Ver Todos los Gastos', spree.admin_expenses_path, class: 'btn btn-info' %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 

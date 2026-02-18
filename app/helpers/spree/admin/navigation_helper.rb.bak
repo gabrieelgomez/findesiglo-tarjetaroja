@@ -1,0 +1,68 @@
+module Spree
+  module Admin
+    module NavigationHelper
+      def button(text, icon_name = nil, button_type = 'submit', options = {})
+        if icon_name
+          icon = content_tag(:span, '', class: "icon icon-#{icon_name}")
+          text_with_icon = icon + ' ' + text
+        else
+          text_with_icon = text
+        end
+
+        button_tag(text_with_icon.html_safe, options.merge(type: button_type, class: "btn btn-primary #{options[:class]}"))
+      end
+
+      def button_link_to(text, url, html_options = {})
+        if (html_options[:method] &&
+            html_options[:method].to_s.downcase != 'get') ||
+           html_options[:confirm]
+          form_tag(url, method: html_options.delete(:method), data: { confirm: html_options.delete(:confirm) }) do
+            button_tag(text, html_options)
+          end
+        else
+          if html_options['data-toggle'] == 'dropdown'
+            html_options[:class] = 'btn dropdown-toggle ' + (html_options[:class] || 'btn-secondary')
+          else
+            html_options[:class] = 'btn ' + (html_options[:class] || 'btn-secondary')
+          end
+          link_to(text, url, html_options)
+        end
+      end
+
+      def link_to_edit(resource, options = {})
+        url = options[:url] || edit_object_url(resource)
+        link_to_edit_url(url, options)
+      end
+
+      def link_to_edit_url(url, options = {})
+        options[:data] = { action: 'edit' }
+        link_to_with_icon('edit.svg', Spree.t(:edit), url, options)
+      end
+
+      def link_to_delete(resource, options = {})
+        url = options[:url] || object_url(resource)
+        name = options[:name] || Spree.t(:delete)
+        options[:data] = { confirm: Spree.t(:are_you_sure), action: 'remove' }
+        link_to_with_icon('delete.svg', name, url, options)
+      end
+
+      def link_to_with_icon(icon_name, text, url, options = {})
+        if icon_name
+          icon = content_tag(:span, '', class: "icon icon-#{icon_name}")
+          text_with_icon = icon + ' ' + text
+        else
+          text_with_icon = text
+        end
+        link_to(text_with_icon.html_safe, url, options)
+      end
+
+      def edit_object_url(resource)
+        send("edit_admin_#{resource.class.name.underscore}_url", resource)
+      end
+
+      def object_url(resource)
+        send("admin_#{resource.class.name.underscore}_url", resource)
+      end
+    end
+  end
+end 

@@ -1,0 +1,773 @@
+<!-- Modal para imagen de dirección -->
+<div class="modal fade" id="address-image-modal" tabindex="-1" aria-labelledby="addressImageModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addressImageModalLabel">Imagen de Dirección</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer gap-2">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-info" id="print-image-btn" style="display: none;">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <button type="button" class="btn btn-outline-primary" id="print-printnode-btn" style="display: none;" title="Enviar a la impresora vía PrintNode (funciona desde la web, sin instalar nada en el PC).">
+          <i class="fas fa-cloud-print-alt"></i> Imprimir con PrintNode
+        </button>
+        <button type="button" class="btn btn-primary" id="download-image-btn" style="display: none;">
+          <i class="fas fa-download"></i> Descargar Imagen
+        </button>
+        <button type="button" class="btn btn-success" id="send-to-group-btn" style="display: none;">
+          <i class="fab fa-whatsapp"></i> Enviar pedido al grupo
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="address-image-content">
+          <!-- El contenido se cargará dinámicamente -->
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Cargando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Cargar html2canvas
+  function loadHtml2Canvas() {
+    if (typeof html2canvas === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      document.head.appendChild(script);
+    }
+  }
+  
+  loadHtml2Canvas();
+  
+  // Variables para almacenar context del modal (ticket y ESC/POS)
+  let currentModalOrderId = null;
+  let currentModalAddressId = null;
+  
+  // Manejar la apertura del modal
+  $('#address-image-modal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const addressId = button.data('address-id');
+    const orderId = button.data('order-id');
+    currentModalOrderId = orderId;
+    currentModalAddressId = addressId;
+    const modal = $(this);
+    
+    console.log('Modal abierto:', { addressId, orderId });
+    
+    // Cargar el contenido de la dirección
+    const url = orderId ? `/admin/address_images/${addressId}?order_id=${orderId}` : `/admin/address_images/${addressId}`;
+    console.log('URL de carga:', url);
+    
+    $.get(url, function(data) {
+      modal.find('#address-image-content').html(data);
+      modal.find('#download-image-btn').show();
+      modal.find('#print-image-btn').show();
+      modal.find('#print-printnode-btn').show();
+      modal.find('#send-to-group-btn').show();
+    });
+  });
+  
+  // Manejar la descarga de imagen
+  $(document).on('click', '#download-image-btn', function() {
+    generateImage();
+  });
+  
+  // Manejar la impresión
+  $(document).on('click', '#print-image-btn', function() {
+    printImage();
+  });
+  
+  // Manejar el envío al grupo de WhatsApp
+  $(document).on('click', '#send-to-group-btn', function() {
+    sendImageToGroup();
+  });
+  
+  // Generar ticket ESC/POS desde el botón fuera del modal (al lado de Generar Ticket)
+  $(document).on('click', '.btn-generar-ticket-escpos', function() {
+    var btn = $(this);
+    currentModalAddressId = btn.data('address-id');
+    currentModalOrderId = btn.data('order-id');
+    printEscposTicket(btn);
+  });
+
+  // Enviar ticket a la impresora vía PrintNode (desde el servidor, funciona en la web)
+  $(document).on('click', '#print-printnode-btn', function() {
+    printViaPrintNode();
+  });
+  
+  function printEscposTicket(triggerBtn) {
+    if (!currentModalAddressId) {
+      alert('Error: No se encontró la dirección.');
+      return;
+    }
+    var btn = triggerBtn && triggerBtn.length ? triggerBtn : $('.btn-generar-ticket-escpos');
+    var originalHtml = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Preparando...');
+    
+    var orderParam = currentModalOrderId ? '?order_id=' + encodeURIComponent(currentModalOrderId) : '';
+    var escposUrl = '/admin/address_images/' + currentModalAddressId + '/escpos' + orderParam;
+    
+    function onError(msg) {
+      btn.prop('disabled', false).html(originalHtml);
+      alert(msg);
+    }
+    
+    // Cargar QZ Tray si no está
+    if (typeof qz === 'undefined') {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/qz-tray@2.2.5/qz-tray.js';
+      script.onload = function() { doPrintEscpos(escposUrl, btn, originalHtml, onError); };
+      script.onerror = function() { onError('No se pudo cargar QZ Tray. Compruebe su conexión.'); };
+      document.head.appendChild(script);
+    } else {
+      doPrintEscpos(escposUrl, btn, originalHtml, onError);
+    }
+  }
+  
+  function doPrintEscpos(escposUrl, btn, originalHtml, onError) {
+    function resetBtn() { btn.prop('disabled', false).html(originalHtml); }
+
+    var csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+    var signUrl = '/admin/address_images/qz_sign';
+    var certUrl = '/admin/address_images/qz_certificate';
+
+    // Configurar firma para que funcione desde tutarjetaroja.com (remoto)
+    function setupQzSigning() {
+      return fetch(certUrl, { method: 'GET', credentials: 'same-origin' })
+        .then(function(r) {
+          if (!r.ok) return Promise.resolve(false);
+          return r.text().then(function(certPem) {
+            if (!certPem || !certPem.trim()) return Promise.resolve(false);
+            qz.security.setCertificatePromise(function(resolve) { resolve(certPem); });
+            qz.security.setSignaturePromise(function(toSign) {
+              return function(resolve, reject) {
+                fetch(signUrl, {
+                  method: 'POST',
+                  credentials: 'same-origin',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-Token': csrfToken
+                  },
+                  body: JSON.stringify({ request: toSign })
+                }).then(function(res) {
+                  return res.json().then(function(data) {
+                    if (data.signature) resolve(data.signature); else reject(new Error(data.error || 'Sin firma'));
+                  });
+                }).catch(reject);
+              };
+            });
+            return true;
+          });
+        })
+        .catch(function() { return false; });
+    }
+
+    setupQzSigning()
+      .then(function() { return fetch(escposUrl, { headers: { 'Accept': 'application/json' } }); })
+      .then(function(r) { return r.ok ? r.json() : Promise.reject(new Error('Error al obtener el ticket')); })
+      .then(function(json) {
+        if (!json.data) return Promise.reject(new Error('Respuesta sin datos'));
+        return json.data;
+      })
+      .then(function(base64Data) {
+        return qz.websocket.connect().then(function() { return base64Data; });
+      })
+      .then(function(base64Data) {
+        return qz.printers.find().then(function(printers) {
+          var name = (printers && printers.length > 0) ? printers[0] : null;
+          if (!name) return Promise.reject(new Error('No se encontró ninguna impresora. Conecte una impresora térmica.'));
+          var config = qz.configs.create(name, { encoding: 'UTF-8' });
+          return qz.print(config, [{ type: 'raw', format: 'base64', data: base64Data }]);
+        });
+      })
+      .then(function() {
+        return qz.websocket.disconnect();
+      })
+      .then(function() {
+        resetBtn();
+      })
+      .catch(function(err) {
+        var msg = err.message || String(err);
+        if (msg.indexOf('Connection refused') !== -1 || msg.indexOf('Unable to connect') !== -1) {
+          msg = 'QZ Tray no está en ejecución. Instale y abra QZ Tray en este equipo (https://qz.io) y vuelva a intentar.';
+        }
+        resetBtn();
+        onError('Ticket ESC/POS: ' + msg);
+      });
+  }
+
+  function printViaPrintNode() {
+    if (!currentModalAddressId) {
+      alert('Error: No se encontró la dirección. Cierre y vuelva a abrir el ticket.');
+      return;
+    }
+    var btn = $('#print-printnode-btn');
+    var originalHtml = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+    var csrfToken = $('meta[name="csrf-token"]').attr('content') || '';
+    var body = {
+      address_id: currentModalAddressId,
+      order_id: currentModalOrderId || ''
+    };
+    fetch('/admin/address_images/print_via_printnode', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': csrfToken,
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(body)
+    }).then(function(r) {
+      return r.json().then(function(data) {
+        if (!r.ok) throw new Error(data.error || 'Error al enviar');
+        return data;
+      });
+    }).then(function(data) {
+      btn.prop('disabled', false).html(originalHtml);
+      if (data.success) alert('Ticket enviado a la impresora.');
+    }).catch(function(err) {
+      btn.prop('disabled', false).html(originalHtml);
+      alert('PrintNode: ' + (err.message || 'Error al enviar a la impresora.'));
+    });
+  }
+  
+  function generateImage() {
+    console.log('Generando imagen...');
+    console.log('html2canvas disponible:', typeof html2canvas !== 'undefined');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(generateImage, 500);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-content .address-card');
+    console.log('Card encontrada:', !!card);
+    if (!card) {
+      console.error('No se encontró el elemento .address-card');
+      return;
+    }
+    
+    console.log('Generando canvas...');
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: 500,
+      height: card.offsetHeight
+    }).then(function(canvas) {
+      console.log('Canvas generado, creando descarga...');
+      const link = document.createElement('a');
+      link.download = `direccion_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log('Descarga iniciada');
+    }).catch(function(error) {
+      console.error('Error generando imagen:', error);
+    });
+  }
+  
+  function printImage() {
+    console.log('Imprimiendo imagen...');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(printImage, 500);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-content .address-card');
+    if (!card) {
+      console.error('No se encontró el elemento .address-card');
+      return;
+    }
+    
+    console.log('Generando canvas para impresión...');
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: 500,
+      height: card.offsetHeight
+    }).then(function(canvas) {
+      console.log('Canvas generado, abriendo ventana de impresión...');
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Dirección - Imprimir</title>
+            <style>
+              body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+              .print-container { text-align: center; }
+              img { max-width: 100%; height: auto; }
+            </style>
+          </head>
+          <body>
+            <div class="print-container">
+              <img src="${canvas.toDataURL('image/png')}" alt="Dirección" />
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      printWindow.onload = function() {
+        printWindow.print();
+        printWindow.close();
+      };
+    }).catch(function(error) {
+      console.error('Error generando imagen para impresión:', error);
+    });
+  }
+  
+  function sendImageToGroup() {
+    console.log('Enviando imagen al grupo de WhatsApp...');
+    
+    // ID fijo del grupo
+    const groupId = 'Jn0x4WpimaJDfMa47UVqYK';
+    
+    // Validar que tengamos order_id
+    if (!currentModalOrderId) {
+      alert('Error: No se encontró información de la orden.');
+      return;
+    }
+    
+    // Deshabilitar botón mientras se procesa
+    const btn = $('#send-to-group-btn');
+    const originalText = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(sendImageToGroup, 500);
+      btn.prop('disabled', false).html(originalText);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-content .address-card');
+    if (!card) {
+      console.error('No se encontró el elemento .address-card');
+      alert('Error: No se pudo generar la imagen. Por favor, intente nuevamente.');
+      btn.prop('disabled', false).html(originalText);
+      return;
+    }
+    
+    // Obtener CSRF token
+    const csrfToken = $('meta[name="csrf-token"]').attr('content') || 
+                     $('input[name="authenticity_token"]').val() ||
+                     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+    
+    console.log('Generando canvas para envío al grupo...');
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: 500,
+      height: card.offsetHeight
+    }).then(function(canvas) {
+      console.log('Canvas generado, convirtiendo a base64...');
+      
+      // Convertir canvas a base64
+      const imageData = canvas.toDataURL('image/png');
+      
+      console.log('Subiendo imagen y enviando al grupo...');
+      
+      // Enviar al endpoint con el ID del grupo
+      return fetch('/admin/address_images/upload_and_send_whatsapp_invoice', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          image: imageData,
+          order_id: currentModalOrderId,
+          phone: groupId
+        })
+      });
+    }).then(function(response) {
+      console.log('Respuesta del servidor:', response.status);
+      if (!response.ok) {
+        return response.json().then(function(data) {
+          console.error('Error:', data);
+          throw new Error(data.error || 'Error al procesar la solicitud');
+        }).catch(function(e) {
+          return response.text().then(function(text) {
+            console.error('Error respuesta texto:', text);
+            throw new Error('Error al procesar: ' + text);
+          });
+        });
+      }
+      return response.json();
+    }).then(function(data) {
+      if (data.success) {
+        console.log('Solicitud procesada exitosamente:', data);
+      } else {
+        console.warn('Procesamiento con advertencias:', data);
+        alert('⚠️ ' + (data.error || 'La solicitud se procesó pero hubo algunos problemas.'));
+      }
+      btn.prop('disabled', false).html(originalText);
+    }).catch(function(error) {
+      console.error('Error procesando solicitud:', error);
+      alert('❌ Error al procesar la solicitud:\n\n' + (error.message || 'Error desconocido') + '\n\nPor favor, verifica:\n- Que el servidor esté funcionando\n- Que la API esté configurada correctamente');
+      btn.prop('disabled', false).html(originalText);
+    });
+  }
+});
+</script>
+
+<!-- Modal para imagen de dirección A4 -->
+<div class="modal fade" id="address-image-a4-modal" tabindex="-1" aria-labelledby="addressImageA4ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" style="max-width: 90%;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addressImageA4ModalLabel">Imagen de Dirección A4</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-footer gap-2">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" id="print-image-a4-btn" style="display: none;">
+          <i class="fas fa-print"></i> Imprimir
+        </button>
+        <div id="whatsapp-section" style="display: none; margin-right: 10px;">
+          <input type="text" id="whatsapp-phone-input" class="form-control form-control-sm" 
+                 placeholder="Número de WhatsApp (ej: 584224292286)" 
+                 style="display: inline-block; width: 250px; margin-right: 5px;">
+          <button type="button" class="btn btn-success" id="send-whatsapp-a4-btn">
+            <i class="fab fa-whatsapp"></i> Enviar por WhatsApp
+          </button>
+        </div>
+        <button type="button" class="btn btn-primary" id="download-image-a4-btn" style="display: none;">
+          <i class="fas fa-download"></i> Descargar Imagen A4
+        </button>
+      </div>
+      <div class="modal-body" style="overflow-x: auto;">
+        <div id="address-image-a4-content">
+          <!-- El contenido se cargará dinámicamente -->
+          <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+              <span class="sr-only">Cargando...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Cargar html2canvas para A4
+  function loadHtml2CanvasA4() {
+    if (typeof html2canvas === 'undefined') {
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+      document.head.appendChild(script);
+    }
+  }
+  
+  loadHtml2CanvasA4();
+  
+  // Variables para almacenar datos del modal
+  let phoneNumber = null;
+  let currentOrderId = null;
+  
+  // Manejar la apertura del modal A4
+  $('#address-image-a4-modal').on('show.bs.modal', function (event) {
+    const button = $(event.relatedTarget);
+    const addressId = button.data('address-id');
+    currentOrderId = button.data('order-id');
+    phoneNumber = button.data('phone'); // Guardar el número de teléfono
+    const modal = $(this);
+    
+    console.log('Modal A4 abierto:', { addressId, orderId: currentOrderId, phoneNumber });
+    
+    // Cargar el contenido de la dirección A4
+    const url = currentOrderId ? `/admin/address_images/${addressId}/show_a4?order_id=${currentOrderId}` : `/admin/address_images/${addressId}/show_a4`;
+    console.log('URL de carga A4:', url);
+    
+    $.get(url, function(data) {
+      modal.find('#address-image-a4-content').html(data);
+      modal.find('#download-image-a4-btn').show();
+      modal.find('#print-image-a4-btn').show();
+      // Mostrar sección de WhatsApp
+      modal.find('#whatsapp-section').show();
+      // Pre-llenar el campo con el número de teléfono si está disponible
+      if (phoneNumber) {
+        modal.find('#whatsapp-phone-input').val(phoneNumber);
+      }
+    });
+  });
+  
+  // Manejar la descarga de imagen A4
+  $(document).on('click', '#download-image-a4-btn', function() {
+    generateImageA4();
+  });
+  
+  // Manejar la impresión A4
+  $(document).on('click', '#print-image-a4-btn', function() {
+    printImageA4();
+  });
+  
+  // Manejar el envío por WhatsApp
+  $(document).on('click', '#send-whatsapp-a4-btn', function() {
+    sendImageToWhatsApp();
+  });
+  
+  function generateImageA4() {
+    console.log('Generando imagen A4...');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(generateImageA4, 500);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-a4-content .address-card-a4');
+    console.log('Card A4 encontrada:', !!card);
+    if (!card) {
+      console.error('No se encontró el elemento .address-card-a4');
+      return;
+    }
+    
+    console.log('Generando canvas A4...');
+    // A4 dimensions: 210mm x 297mm at 300 DPI = 2480 x 3508 pixels
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: card.offsetWidth,
+      height: card.offsetHeight,
+      windowWidth: card.scrollWidth,
+      windowHeight: card.scrollHeight
+    }).then(function(canvas) {
+      console.log('Canvas A4 generado, creando descarga...');
+      const link = document.createElement('a');
+      link.download = `direccion_a4_${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      console.log('Descarga A4 iniciada');
+    }).catch(function(error) {
+      console.error('Error generando imagen A4:', error);
+    });
+  }
+  
+  function printImageA4() {
+    console.log('Imprimiendo imagen A4...');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(printImageA4, 500);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-a4-content .address-card-a4');
+    if (!card) {
+      console.error('No se encontró el elemento .address-card-a4');
+      return;
+    }
+    
+    console.log('Generando canvas A4 para impresión...');
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: card.offsetWidth,
+      height: card.offsetHeight,
+      windowWidth: card.scrollWidth,
+      windowHeight: card.scrollHeight
+    }).then(function(canvas) {
+      console.log('Canvas A4 generado, abriendo ventana de impresión...');
+      
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Dirección A4 - Imprimir</title>
+            <style>
+              @page {
+                size: A4;
+                margin: 0;
+              }
+              body { 
+                margin: 0; 
+                padding: 0; 
+                font-family: Arial, sans-serif; 
+              }
+              .print-container { 
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0 auto;
+              }
+              img { 
+                width: 100%; 
+                height: auto; 
+                display: block;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="print-container">
+              <img src="${canvas.toDataURL('image/png')}" alt="Dirección A4" />
+            </div>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+      
+      printWindow.onload = function() {
+        setTimeout(function() {
+          printWindow.print();
+        }, 250);
+      };
+    }).catch(function(error) {
+      console.error('Error generando imagen A4 para impresión:', error);
+    });
+  }
+  
+  function sendImageToWhatsApp() {
+    console.log('Enviando imagen por WhatsApp...');
+    
+    // Validar que tengamos order_id
+    if (!currentOrderId) {
+      alert('Error: No se encontró información de la orden.');
+      return;
+    }
+    
+    // Obtener el número del campo de entrada
+    const phoneInput = $('#whatsapp-phone-input').val();
+    if (!phoneInput || phoneInput.trim() === '') {
+      alert('Por favor, ingresa un número de teléfono válido.');
+      $('#whatsapp-phone-input').focus();
+      return;
+    }
+    
+    // Validar y formatear el número de teléfono
+    let formattedPhone = phoneInput.replace(/\D/g, ''); // Remover caracteres no numéricos
+    
+    if (formattedPhone.length < 10) {
+      alert('El número de teléfono debe tener al menos 10 dígitos.');
+      $('#whatsapp-phone-input').focus();
+      return;
+    }
+    
+    // Deshabilitar botón mientras se procesa
+    const btn = $('#send-whatsapp-a4-btn');
+    const originalText = btn.html();
+    btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin"></i> Enviando...');
+    
+    if (typeof html2canvas === 'undefined') {
+      console.log('Esperando a que html2canvas se cargue...');
+      setTimeout(sendImageToWhatsApp, 500);
+      btn.prop('disabled', false).html(originalText);
+      return;
+    }
+    
+    const card = document.querySelector('#address-image-a4-content .address-card-a4');
+    if (!card) {
+      console.error('No se encontró el elemento .address-card-a4');
+      alert('Error: No se pudo generar la imagen. Por favor, intente nuevamente.');
+      btn.prop('disabled', false).html(originalText);
+      return;
+    }
+    
+    // Obtener CSRF token (fuera del .then() para que esté disponible en todo el scope)
+    const csrfToken = $('meta[name="csrf-token"]').attr('content') || 
+                     $('input[name="authenticity_token"]').val() ||
+                     document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+    
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (csrfToken) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
+    
+    console.log('Generando canvas para WhatsApp...');
+    html2canvas(card, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      width: card.offsetWidth,
+      height: card.offsetHeight,
+      windowWidth: card.scrollWidth,
+      windowHeight: card.scrollHeight
+    }).then(function(canvas) {
+      console.log('Canvas generado, convirtiendo a base64...');
+      
+      // Convertir canvas a base64
+      const imageData = canvas.toDataURL('image/png');
+      
+      console.log('Subiendo imagen y enviando por WhatsApp en un solo request...');
+      
+      // Un solo request: subir imagen y enviar por WhatsApp (todo se procesa en segundo plano)
+      return fetch('/admin/address_images/upload_and_send_whatsapp_invoice', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          image: imageData,
+          order_id: currentOrderId,
+          phone: formattedPhone
+        })
+      });
+    }).then(function(response) {
+      console.log('Respuesta del servidor:', response.status);
+      if (!response.ok) {
+        return response.json().then(function(data) {
+          console.error('Error:', data);
+          throw new Error(data.error || 'Error al procesar la solicitud');
+        }).catch(function(e) {
+          return response.text().then(function(text) {
+            console.error('Error respuesta texto:', text);
+            throw new Error('Error al procesar: ' + text);
+          });
+        });
+      }
+      return response.json();
+    }).then(function(data) {
+      if (data.success) {
+        console.log('Solicitud procesada exitosamente:', data);
+      } else {
+        console.warn('Procesamiento con advertencias:', data);
+        alert('⚠️ ' + (data.error || 'La solicitud se procesó pero hubo algunos problemas.'));
+      }
+      btn.prop('disabled', false).html(originalText);
+    }).catch(function(error) {
+      console.error('Error procesando solicitud:', error);
+      alert('❌ Error al procesar la solicitud:\n\n' + (error.message || 'Error desconocido') + '\n\nPor favor, verifica:\n- Que el servidor esté funcionando\n- Que el número de teléfono sea válido\n- Que la API esté configurada correctamente');
+      btn.prop('disabled', false).html(originalText);
+    });
+  }
+});
+</script>

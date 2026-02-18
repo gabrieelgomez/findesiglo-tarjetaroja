@@ -1,0 +1,86 @@
+es:
+  spree:
+    storefront:
+      account:
+        change_password: Cambiar contraseña
+        newsletter_settings: Configuración del boletín
+        no_addresses_description: Si realizas un pedido, verás los detalles de la dirección aquí.
+        no_addresses_title: Actualmente no tienes direcciones
+        no_gift_cards: Actualmente no tienes tarjetas de regalo
+        no_orders_description: Si realizas un pedido, verás los detalles aquí.
+        no_orders_title: Actualmente no tienes pedidos
+        no_store_credits: No tienes crédito en la tienda.
+        personal_details: Datos personales
+        please_update_your_contact_details: Por favor, actualiza tus datos de contacto
+        store_credits_history: Historial de créditos en tienda
+      cart:
+        items_in_cart: Artículos en el carrito
+        shipping_and_taxes_calculated_at_checkout: Envío es cobro destino, el cupón de descuento se aplica en el siguiente paso.
+        view_bag: Ver bolsa
+      checkout:
+        all_transactions_are_secure_and_encrypted: Todas las transacciones son seguras y están encriptadas
+        already_have_an_account: ¿Ya tienes una cuenta?
+        backorder_notice: 'Algunos productos en tu carrito se enviarán un poco más tarde que el resto de tu pedido:'
+        by_placing_this_order_you_agree_to: Al realizar este pedido aceptas
+        calculated_at_next_step: Calculado en el siguiente paso
+        continue_to_cart: Volver al carrito
+        continue_to_checkout: Continuar con el pago
+        delivery_method: Método de entrega
+        errors:
+          invalid_line_items:
+            one: Este artículo se eliminará de tu carrito porque no hay métodos de entrega disponibles para tu dirección.
+            other: Estos %{count} artículos se eliminarán de tu carrito porque no hay métodos de entrega disponibles para tu dirección.
+        gift_card_amount_applied: La tarjeta de regalo %{code} aplicó %{amount} a tu pedido.
+        it_seems_you_already_have_an_account_html: Parece que ya tienes una cuenta con nosotros. Por favor %{link} para continuar.
+        or_continue_below: o continúa abajo
+        order_already_paid: No necesitas pagar nada, solo haz clic en el botón Confirmar pedido.
+        order_success: ¡Tu pedido está confirmado!
+        order_success_message: Cuando tu pedido esté listo, recibirás un correo electrónico de confirmación.
+        payment_processing_message: Recibirás un correo electrónico cuando tu pago sea procesado.
+        return_to_cart: Volver al carrito
+        shipping_not_available: Envío no disponible
+        signup_for_an_account: Crea una cuenta para compras futuras más rápidas, seguimiento de pedidos y más.
+        special_instructions_placeholder: Aquí puedes agregar instrucciones especiales para tu pedido
+        store_credits_amount_applied: Aplicaste un crédito en tienda de %{amount} a tu pedido.
+        thanks_for_your_order: ¡Gracias %{name} por tu pedido!
+        you_will_need_to_pay_only: Solo deberás pagar %{amount} con el método de pago que elijas.
+      contacts:
+        customer_support_email_not_configured: El correo de soporte al cliente no está configurado
+        message_not_sent: Lamentablemente no pudimos enviar el correo en este momento. Intenta más tarde
+        message_sent: ¡Mensaje enviado!
+      newsletter_subscribers:
+        success: ¡Gracias por suscribirte a nuestro boletín!
+      newsletter_subscription:
+        description: Toma el control de tu configuración y personaliza tu experiencia según tus preferencias. Ajusta tus notificaciones como desees.
+        join: Envíame correos sobre nuevos productos, ofertas y más. Puedes darte de baja en cualquier momento.
+        status: Actualmente estás %{status} al boletín.
+      policies:
+        last_update_at: Última actualización %{date}
+      products:
+        pinch_to_zoom_html: Pellizca para<br>acercar
+      refund_action_not_required_message:
+        order_canceled:
+          fully: Este pedido ha sido cancelado. No se requiere ninguna otra acción. Recibirás un reembolso en unos días hábiles.
+          partially: Este pedido ha sido cancelado parcialmente. No se requiere ninguna otra acción. Recibirás un reembolso en unos días hábiles.
+        order_refunded:
+          fully: Este pedido ha sido reembolsado. No se requiere ninguna otra acción. Recibirás un reembolso en unos días hábiles.
+          partially: Este pedido ha sido reembolsado parcialmente. No se requiere ninguna otra acción. Recibirás un reembolso en unos días hábiles.
+      refund_action_required_message:
+        order_canceled:
+          fully: Este pedido ha sido cancelado. El monto pagado con el método de pago seleccionado será reembolsado en unos días hábiles. Por favor contacta a %{customer_support_email} para recibir un nuevo cupón.
+          partially: Este pedido ha sido cancelado parcialmente. El monto pagado con el método de pago seleccionado será reembolsado en unos días hábiles. Por favor contacta a %{customer_support_email} para recibir un nuevo cupón.
+        order_refunded:
+          fully: Este pedido ha sido reembolsado. El monto pagado con el método de pago seleccionado será reembolsado en unos días hábiles. Por favor contacta a %{customer_support_email} para recibir un nuevo cupón.
+          partially: Este pedido ha sido reembolsado parcialmente. El monto pagado con el método de pago seleccionado será reembolsado en unos días hábiles. Por favor contacta a %{customer_support_email} para recibir un nuevo cupón.
+      variant_picker:
+        please_choose: Por favor elige %{option_type}
+        please_choose_all_options: Por favor elige todas las opciones
+      wished_items:
+        add: Agregar a la lista de deseos
+        no_wished_items:
+          description: Aún no tienes artículos guardados.
+          title: No tienes artículos guardados
+        remove: Eliminar de la lista de deseos
+        remove_error: Ya eliminaste este artículo de tu lista de deseos
+        select_variant: Selecciona una variante para agregar a la lista de deseos
+        unavailable: No disponible

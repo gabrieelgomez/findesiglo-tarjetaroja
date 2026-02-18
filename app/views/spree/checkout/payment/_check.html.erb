@@ -1,0 +1,46 @@
+<% if payment_method.name.in?(["Binance", "Zelle", "Pagomovil", "Dólares Bancamiga"]) %>
+  <% if payment_method.name == "Binance" %>
+    <div class="text-sm leading-4 uppercase tracking-widest">Binance ID: 26287299</div>
+  <% elsif payment_method.name == "Zelle" %>
+
+    <% if @order.total >= 40 %>
+      <div class="text-sm tracking-widest">Nombre: Luis Pitters</div>
+      <div class="text-sm leading-4 uppercase tracking-widest">Cuenta: <span>pittersluis</span><span>@</span><span>gmail.com</span> </div>
+    <% else %>
+      <div class="text-sm tracking-widest">Nombre: Luis Pitters</div>
+      <div class="text-sm leading-4 uppercase tracking-widest">Cuenta: <span>diaz09132</span><span>@</span><span>gmail.com</span> </div>
+    <% end %>
+  <% elsif payment_method.name == "Dólares Bancamiga" %>
+    <div class="text-sm leading-4 uppercase tracking-widest">Datos: </div>
+    <div class="text-sm tracking-widest">Banco: BANCAMIGA</div>
+    <div class="text-sm tracking-widest">Nombre: Gabriel Gómez</div>
+    <div class="text-sm tracking-widest">Cédula: 27420015</div>
+    <div class="text-sm tracking-widest">Cuenta: 01720204972045926520</div>
+  <% elsif payment_method.name == "Pagomovil" %>
+    <% total_price_bcv = @order.line_items.sum { |li| (li.variant.product.price_bcv || 0) * li.quantity } %>
+    <div class="text-sm leading-4 uppercase tracking-widest">Datos: </div>
+    <div class="text-sm tracking-widest">Banco: Bancamiga 0172</div>
+    <div class="text-sm tracking-widest">Cédula: 27420015</div>
+    <div class="text-sm tracking-widest">Teléfono: 0412-549-9098</div>
+    <div class="text-sm tracking-widest">Total en BCV: <%= number_to_currency(total_price_bcv, unit: '$', precision: 2) %> </div>
+    <div class="text-sm tracking-widest">Tasa de cambio: <%= Bcv.last.value %> </div>
+    <div class="text-sm tracking-widest">Total en Bs: <%= number_to_currency(total_price_bcv * Bcv.last.value, unit: 'Bs. ', precision: 2) %> </div>
+  <% end %>
+
+  <br>
+  <br>
+
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm mb-1" for="payment_referencia"><%= "Número de referencia o Titular de la cuenta si es Zelle" %></label>
+      <%= text_field_tag "order[payments_attributes][][referencia]", nil, id: "payment_referencia", class: "form-control w-full", required: true, minlength: 6 %>
+    </div>
+    <div>
+      <label class="block text-sm mb-1" for="payment_receipt_image"><%= "Comprobante del pago (imagen)" %></label>
+      <%= file_field_tag "order[payments_attributes][][receipt_image]", id: "payment_receipt_image", accept: "image/*", class: "form-control w-full", required: true %>
+      <p class="text-xs text-neutral-500 mt-1"><%= "Formatos admitidos: JPG, PNG, HEIC. Tamaño máx. 10MB." %></p>
+    </div>
+  </div>
+<% else %>
+  <%= payment_method.name %>
+<% end %>

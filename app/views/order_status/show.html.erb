@@ -1,0 +1,91 @@
+<style>
+  .order-status-page { font-family: system-ui, -apple-system, sans-serif; max-width: 720px; margin: 0 auto; padding: 2rem 1rem; }
+  .order-status-page h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #1a1a1a; }
+  .order-status-page .card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 1.5rem; margin-bottom: 1.25rem; border: 1px solid #eee; }
+  .order-status-page .card-title { font-size: 0.875rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.75rem; }
+  .order-status-page .form-inline { display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center; }
+  .order-status-page input[type="text"] { flex: 1; min-width: 200px; padding: 0.75rem 1rem; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; }
+  .order-status-page input[type="text"]:focus { outline: none; border-color: #0ea5e9; box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+  .order-status-page .btn { padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.9375rem; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
+  .order-status-page .btn-primary { background: #0ea5e9; color: #fff; }
+  .order-status-page .btn-primary:hover { background: #0284c7; }
+  .order-status-page .status-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
+  .order-status-page .status-enviado { background: #dcfce7; color: #166534; }
+  .order-status-page .status-no-enviado { background: #fef3c7; color: #92400e; }
+  .order-status-page .detail-row { margin-bottom: 0.5rem; font-size: 0.9375rem; color: #334155; }
+  .order-status-page .detail-label { color: #64748b; margin-right: 0.35rem; }
+  .order-status-page .tracking-image-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
+  .order-status-page .tracking-image-wrap img { max-width: 100%; height: auto; display: block; }
+  .order-status-page .no-image { padding: 2rem; text-align: center; background: #f8fafc; color: #64748b; border-radius: 12px; }
+  .order-status-page .error-msg { color: #b91c1c; padding: 1rem; background: #fef2f2; border-radius: 10px; margin-bottom: 1rem; }
+  .order-status-page .order-number-hero { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem; }
+  .order-status-page .status-message { margin-top: 1rem; margin-bottom: 0; font-size: 0.9375rem; color: #334155; line-height: 1.5; }
+</style>
+<title>Estado del pedido</title>
+
+<div class="order-status-page">
+  <h1>Estado del pedido</h1>
+
+  <%= form_with url: order_status_path, method: :get, local: true, class: "card" do |f| %>
+    <div class="card-title">Consultar por número de orden</div>
+    <div class="form-inline">
+      <input type="text" name="order" value="<%= params[:order] %>" placeholder="Ej: R923227399" autofocus>
+      <button type="submit" class="btn btn-primary">Buscar</button>
+    </div>
+  <% end %>
+
+  <% if params[:order].present? %>
+    <% if @order.nil? %>
+      <div class="card error-msg">
+        No se encontró ninguna orden con el número <strong><%= ERB::Util.html_escape(params[:order]) %></strong>. Verifica el número e intenta de nuevo.
+      </div>
+    <% else %>
+      <% shipped = @order.shipped? || @order.tracking_image.attached? %>
+      <div class="card">
+        <div class="card-title">Número de orden</div>
+        <div class="order-number-hero"><%= @order.number %></div>
+        <div class="status-badge <%= shipped ? 'status-enviado' : 'status-no-enviado' %>">
+          <%= shipped ? "✓ Enviado" : "○ No enviado" %>
+        </div>
+        <% if shipped %>
+          <p class="status-message">Su pedido ha sido enviado y se encuentra en las oficinas de la agencia de envio o en tránsito, al final de la tarde la imagen del tracking será cargada en el sistema para que confirmes la información desde MRW o Zoom</p>
+        <% end %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Imagen de tracking</div>
+        <% if @order.tracking_image.attached? %>
+          <div class="tracking-image-wrap">
+            <%= image_tag @order.tracking_image.variant(resize_to_limit: [800, 800]), alt: "Tracking del pedido #{@order.number}", loading: "lazy" %>
+          </div>
+        <% else %>
+          <div class="no-image">No hay imagen de tracking cargada para este pedido.</div>
+        <% end %>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Cliente</div>
+        <% if @order.user.present? %>
+          <div class="detail-row"><span class="detail-label">Nombre:</span> <%= @order.user.bill_address&.full_name.presence || @order.ship_address&.full_name.presence || "—" %></div>
+          <div class="detail-row"><span class="detail-label">Email:</span> <%= @order.user.email %></div>
+        <% else %>
+          <div class="detail-row"><span class="detail-label">Nombre:</span> <%= @order.ship_address&.full_name.presence || "—" %></div>
+          <div class="detail-row"><span class="detail-label">Email:</span> <%= @order.email.presence || "—" %></div>
+        <% end %>
+      </div>
+
+      <% if @order.ship_address.present? %>
+        <div class="card">
+          <div class="card-title">Dirección de envío</div>
+          <div class="detail-row"><span class="detail-label">Enviar a:</span> <%= @order.ship_address.full_name %></div>
+          <% if @order.ship_address.identifier.present? %><div class="detail-row"><span class="detail-label">Cédula:</span> <%= @order.ship_address.identifier %></div><% end %>
+          <% if @order.ship_address.phone.present? %><div class="detail-row"><span class="detail-label">Teléfono:</span> <%= @order.ship_address.phone %></div><% end %>
+          <div class="detail-row"><span class="detail-label">Dirección:</span> <%= @order.ship_address.address1 %></div>
+          <% if @order.ship_address.agency.present? %><div class="detail-row"><span class="detail-label">Agencia:</span> <%= @order.ship_address.agency %></div><% end %>
+          <% if @order.ship_address.address2.present? %><div class="detail-row"><%= @order.ship_address.address2 %></div><% end %>
+          <div class="detail-row"><%= [@order.ship_address.city, @order.ship_address.state_text, @order.ship_address.zipcode].compact.join(", ") %></div>
+        </div>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

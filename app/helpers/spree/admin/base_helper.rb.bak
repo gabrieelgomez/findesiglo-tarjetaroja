@@ -1,0 +1,33 @@
+module Spree
+  module Admin
+    module BaseHelper
+      def required_span_tag
+        "<span class='required'>*</span>".html_safe
+      end
+
+      def field_container(model, method, options = {}, &block)
+        css_classes = options[:class].to_a
+        css_classes << 'field'
+        css_classes << 'withError' if model.errors[method].any?
+        content_tag(:div, capture(&block), class: css_classes.join(' '), id: "#{model.class.name.underscore}_#{method}_field")
+      end
+
+      def error_message_on(object, method, options = {})
+        object = convert_to_model(object)
+        errors = object.errors[method]
+
+        if errors.any?
+          errors.map { |error| content_tag(:span, error, class: 'errorMessage') }.join.html_safe
+        end
+      end
+
+      def plural_resource_name(resource_class)
+        resource_class.model_name.human(count: :many)
+      end
+
+      def spree_dom_id(record)
+        dom_id(record, 'spree')
+      end
+    end
+  end
+end 

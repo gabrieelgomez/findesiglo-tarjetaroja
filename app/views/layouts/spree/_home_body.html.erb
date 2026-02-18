@@ -1,0 +1,779 @@
+<body class="bg-white text-gray-900 font-sans">
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 py-20 lg:py-32 overflow-hidden" data-controller="hero">
+        <!-- Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0" style="background-image: url('data:image/svg+xml,<svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><g fill="%23ffffff" fill-opacity="0.1"><circle cx="30" cy="30" r="2"/></g></svg>');"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="text-center">
+                <!-- Logo Principal -->
+                <div class="mb-8">
+                    <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_5528.PNG-yBIkBJtv6VLL7DT7bmQgEF7Ifgm35x.png" alt="Tarjeta Roja" class="h-32 lg:h-40 mx-auto">
+                </div>
+                
+                <!-- Título Principal -->
+                <h1 class="text-4xl lg:text-6xl font-bold text-white mb-6 leading-tight">
+                    Las mejores <span class="text-red-400">camisas de fútbol</span><br>
+                    en Venezuela
+                </h1>
+                
+                <!-- Subtítulo -->
+                <p class="text-xl lg:text-2xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                    Precios desde <span class="font-bold text-red-400">$15 USD</span> • Mayor y Detal • Dropshipping • Envíos a todo el país
+                </p>
+                
+                <!-- Botones CTA -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                    <a href="/products" class="bg-red-600 text-white px-8 py-4 rounded-full font-semibold hover:bg-red-700 transform hover:scale-105 transition-all duration-200 shadow-lg text-lg">
+                        <i class="fas fa-tshirt mr-2"></i>
+                        Ver Catálogo Completo
+                    </a>
+                    <a target="_blank" href="https://wa.me/584224292286?text=Hola, quiero comprar una camiseta de fútbol vengo desde la página web..." class="border-2 border-red-400 text-red-400 px-8 py-4 rounded-full font-semibold hover:bg-red-400 hover:text-white transition-all duration-200 text-lg">
+                        <i class="fab fa-whatsapp mr-2"></i>
+                        Contactar WhatsApp
+                    </a>
+                </div>
+                
+                <!-- Stats -->
+                <div class="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+                    <div class="text-center">
+                        <div class="text-3xl lg:text-4xl font-bold text-red-400 mb-2">500+</div>
+                        <div class="text-gray-300">Productos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl lg:text-4xl font-bold text-red-400 mb-2">50+</div>
+                        <div class="text-gray-300">Equipos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-3xl lg:text-4xl font-bold text-red-400 mb-2">24/7</div>
+                        <div class="text-gray-300">Soporte</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Promocional -->
+    <section class="bg-red-600 py-4">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center text-white">
+                <p class="text-lg font-semibold">
+                    🔥 OFERTA ESPECIAL: Descuento del 15% en compras mayores a $100 USD 🔥
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos Destacados -->
+    <section id="productos" class="py-20 bg-white" data-controller="products">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-brand-dark mb-4">
+                    Productos Destacados
+                </h2>
+                <p class="text-xl text-gray-600">Las camisas más vendidas de la temporada</p>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-6">
+                <!-- Real Madrid Local -->
+                <div class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-purple-50 to-white p-4">
+                        <img src="/placeholder.svg?height=200&width=200&text=Real+Madrid+Local" alt="Real Madrid Local" class="w-full h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-brand-dark mb-1">Real Madrid</h3>
+                        <p class="text-gray-600 text-sm mb-2">Camiseta Local 2024</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-red font-bold text-lg">$18</span>
+                            <button class="bg-brand-red text-white px-3 py-1 rounded-full text-sm hover:bg-red-700 transition-colors">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Barcelona Local -->
+                <div class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-blue-50 to-white p-4">
+                        <img src="/placeholder.svg?height=200&width=200&text=Barcelona+Local" alt="Barcelona Local" class="w-full h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-brand-dark mb-1">FC Barcelona</h3>
+                        <p class="text-gray-600 text-sm mb-2">Camiseta Local 2024</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-red font-bold text-lg">$18</span>
+                            <button class="bg-brand-red text-white px-3 py-1 rounded-full text-sm hover:bg-red-700 transition-colors">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PSG Local -->
+                <div class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-blue-900 to-red-600 p-4">
+                        <img src="/placeholder.svg?height=200&width=200&text=PSG+Local" alt="PSG Local" class="w-full h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-brand-dark mb-1">PSG</h3>
+                        <p class="text-gray-600 text-sm mb-2">Camiseta Local 2024</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-red font-bold text-lg">$20</span>
+                            <button class="bg-brand-red text-white px-3 py-1 rounded-full text-sm hover:bg-red-700 transition-colors">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manchester City -->
+                <div class="group cursor-pointer bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden">
+                    <div class="aspect-square bg-gradient-to-br from-sky-400 to-sky-600 p-4">
+                        <img src="/placeholder.svg?height=200&width=200&text=Man+City+Local" alt="Manchester City Local" class="w-full h-full object-contain">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-lg text-brand-dark mb-1">Manchester City</h3>
+                        <p class="text-gray-600 text-sm mb-2">Camiseta Local 2024</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-brand-red font-bold text-lg">$19</span>
+                            <button class="bg-brand-red text-white px-3 py-1 rounded-full text-sm hover:bg-red-700 transition-colors">
+                                <i class="fas fa-cart-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="/products" class="bg-brand-red text-white px-8 py-3 rounded-full font-semibold hover:bg-red-700 transition-colors">
+                    Ver Todos los Productos
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dropshipping Section -->
+    <section class="py-20 bg-gradient-to-br from-green-50 via-white to-blue-50 relative overflow-hidden" data-controller="dropshipping">
+        <!-- Background decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-green-200/20 to-blue-200/20 rounded-full -translate-y-32 translate-x-32"></div>
+        <div class="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-red-200/20 to-yellow-200/20 rounded-full translate-y-24 -translate-x-24"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <!-- Header -->
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-2 rounded-full text-sm font-semibold mb-6">
+                    🇻🇪 PRIMER DROPSHIPPING DE CAMISAS EN VENEZUELA
+                </div>
+                <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+                    Vende nuestros productos
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-blue-600">sin inventario</span>
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                    Lanza tu tienda online hoy mismo sin preocuparte por stock ni envíos. 
+                    <strong>Nosotros nos encargamos de todo.</strong>
+                </p>
+            </div>
+
+            <!-- Benefits Grid -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-green-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-money-bill-wave text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Sin inversión inicial en stock</h3>
+                    <p class="text-gray-600">Comienza a vender sin comprar inventario. Cero riesgo financiero.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-blue-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-warehouse text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Nosotros almacenamos y enviamos</h3>
+                    <p class="text-gray-600">Nos encargamos del almacenamiento, empaque y envío por ti.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-purple-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Ganas desde la primera venta</h3>
+                    <p class="text-gray-600">Obtén ganancias inmediatas sin esperar a recuperar inversión.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-red-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-tshirt text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Catálogo variado y en tendencia</h3>
+                    <p class="text-gray-600">Más de 500 productos de los equipos más populares del mundo.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-yellow-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-shipping-fast text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Envíos rápidos a todo el país</h3>
+                    <p class="text-gray-600">Cobertura nacional con tiempos de entrega optimizados.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-indigo-100">
+                    <div class="w-12 h-12 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center mb-4">
+                        <i class="fas fa-images text-white text-xl"></i>
+                    </div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-2">Material promocional disponible</h3>
+                    <p class="text-gray-600">Imágenes, videos y contenido listo para tus redes sociales.</p>
+                </div>
+            </div>
+
+            <!-- How it Works -->
+            <div class="bg-white rounded-3xl p-8 lg:p-12 shadow-2xl mb-16">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                        ¿Cómo funciona?
+                    </h3>
+                    <p class="text-xl text-gray-600">Es más fácil de lo que imaginas</p>
+                </div>
+
+                <div class="grid md:grid-cols-5 gap-8">
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                            1
+                        </div>
+                        <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-mouse-pointer text-green-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Eliges productos</h4>
+                        <p class="text-gray-600 text-sm">Selecciona las camisas que quieres vender de nuestro catálogo</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                            2
+                        </div>
+                        <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-store text-blue-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Los ofreces</h4>
+                        <p class="text-gray-600 text-sm">Publícalos en tu tienda online o redes sociales</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                            3
+                        </div>
+                        <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-handshake text-purple-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Realizas la venta</h4>
+                        <p class="text-gray-600 text-sm">Cuando vendes, nos pasas los datos del cliente</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                            4
+                        </div>
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-truck text-red-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Nosotros enviamos</h4>
+                        <p class="text-gray-600 text-sm">Procesamos y enviamos el pedido directamente al cliente</p>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="w-16 h-16 bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 text-white font-bold text-xl">
+                            5
+                        </div>
+                        <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-dollar-sign text-yellow-600 text-xl"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-900 mb-2">Tú ganas</h4>
+                        <p class="text-gray-600 text-sm">Obtienes la diferencia como tu ganancia</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Earnings Example -->
+            <div class="bg-gradient-to-r from-green-600 to-blue-600 rounded-3xl p-8 lg:p-12 text-white mb-16">
+                <div class="text-center mb-8">
+                    <h3 class="text-3xl lg:text-4xl font-bold mb-4">
+                        Ejemplo de ganancia
+                    </h3>
+                    <p class="text-xl opacity-90">Mira lo fácil que es ganar dinero</p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-tag text-white text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-2">$25</h4>
+                        <p class="opacity-90">Vendes una camiseta</p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                        <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-box text-white text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-2">$15</h4>
+                        <p class="opacity-90">Nosotros te la cobramos</p>
+                    </div>
+
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 text-center">
+                        <div class="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <i class="fas fa-coins text-yellow-800 text-2xl"></i>
+                        </div>
+                        <h4 class="text-2xl font-bold mb-2">$10</h4>
+                        <p class="opacity-90">Tu ganancia por venta</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-8">
+                    <p class="text-xl font-semibold">
+                        💡 Con solo 10 ventas al mes ya tienes <span class="text-yellow-300">$100 USD</span> extra
+                    </p>
+                </div>
+            </div>
+
+            <!-- Testimonials -->
+            <div class="mb-16">
+                <div class="text-center mb-12">
+                    <h3 class="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
+                        Lo que dicen nuestros socios
+                    </h3>
+                    <p class="text-xl text-gray-600">Historias reales de éxito</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center text-white font-bold">
+                                M
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-bold text-gray-900">María González</h4>
+                                <p class="text-gray-600 text-sm">Emprendedora - Caracas</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 italic mb-4">
+                            "En mi primera semana ya había recuperado lo invertido en la tienda. 
+                            Ahora genero ingresos constantes sin preocuparme por el inventario."
+                        </p>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+                        <div class="flex items-center mb-4">
+                            <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+                                C
+                            </div>
+                            <div class="ml-4">
+                                <h4 class="font-bold text-gray-900">Carlos Rodríguez</h4>
+                                <p class="text-gray-600 text-sm">Revendedor - Valencia</p>
+                            </div>
+                        </div>
+                        <p class="text-gray-700 italic mb-4">
+                            "Nunca pensé que fuera tan fácil comenzar a vender. 
+                            El soporte es excelente y los envíos siempre llegan a tiempo."
+                        </p>
+                        <div class="flex text-yellow-400">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CTA Section -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 rounded-3xl p-8 lg:p-12 text-center text-white">
+                <h3 class="text-3xl lg:text-4xl font-bold mb-4">
+                    🚀 ¿Listo para empezar?
+                </h3>
+                <p class="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
+                    Escríbenos por WhatsApp y empieza a ganar hoy mismo. 
+                    Te ayudamos a configurar todo en menos de 24 horas.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a target="_blank" href="https://wa.me/584224292286?text=Hola, quiero vender sin inventario vengo desde la página web..." class="bg-white text-red-600 px-8 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-all duration-200 transform hover:scale-105 shadow-lg">
+                        <i class="fab fa-whatsapp mr-2 text-green-500"></i>
+                        Quiero vender HOY mismo
+                    </a>
+                    <a href="/products" class="border-2 border-white text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white hover:text-red-600 transition-all duration-200">
+                        <i class="fas fa-download mr-2"></i>
+                        Ver catálogo
+                    </a>
+                </div>
+
+                <div class="mt-8 flex items-center justify-center space-x-6 text-sm opacity-75">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Sin costos ocultos
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Soporte 24/7
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        Configuración gratuita
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Banner Intermedio -->
+    <section class="bg-gradient-to-r from-brand-red to-red-700 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">
+                ¿Eres Mayorista?
+            </h2>
+            <p class="text-xl text-red-100 mb-8">
+                Obtén precios especiales y descuentos exclusivos para revendedores
+            </p>
+            <button class="bg-white text-brand-red px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors text-lg">
+                <i class="fas fa-handshake mr-2"></i>
+                Solicitar Precios Mayoristas
+            </button>
+        </div>
+    </section>
+
+    <!-- Featured Teams -->
+    <section id="equipos" class="py-20 bg-white" data-controller="teams">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-brand-dark mb-4">
+                    Ligas y Equipos Disponibles
+                </h2>
+                <p class="text-xl text-gray-600">Tenemos camisas de las mejores ligas del mundo</p>
+            </div>
+
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="group cursor-pointer" data-action="click->teams#selectLeague" data-league="la-liga">
+                    <div class="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-gray-100">
+                        <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4">
+                            <img src="/placeholder.svg?height=60&width=60&text=La+Liga" alt="La Liga" class="w-12 h-12">
+                        </div>
+                        <h3 class="font-bold text-lg text-brand-dark mb-2">La Liga</h3>
+                        <p class="text-gray-600 text-sm">España</p>
+                        <div class="mt-4 text-brand-red font-semibold">20+ Equipos</div>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer" data-action="click->teams#selectLeague" data-league="premier-league">
+                    <div class="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-gray-100">
+                        <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4">
+                            <img src="/placeholder.svg?height=60&width=60&text=Premier" alt="Premier League" class="w-12 h-12">
+                        </div>
+                        <h3 class="font-bold text-lg text-brand-dark mb-2">Premier League</h3>
+                        <p class="text-gray-600 text-sm">Inglaterra</p>
+                        <div class="mt-4 text-brand-red font-semibold">20+ Equipos</div>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer" data-action="click->teams#selectLeague" data-league="serie-a">
+                    <div class="bg-gradient-to-br from-green-50 to-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-gray-100">
+                        <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4">
+                            <img src="/placeholder.svg?height=60&width=60&text=Serie+A" alt="Serie A" class="w-12 h-12">
+                        </div>
+                        <h3 class="font-bold text-lg text-brand-dark mb-2">Serie A</h3>
+                        <p class="text-gray-600 text-sm">Italia</p>
+                        <div class="mt-4 text-brand-red font-semibold">20+ Equipos</div>
+                    </div>
+                </div>
+
+                <div class="group cursor-pointer" data-action="click->teams#selectLeague" data-league="bundesliga">
+                    <div class="bg-gradient-to-br from-red-50 to-white rounded-2xl p-8 text-center hover:shadow-xl transition-all duration-300 group-hover:scale-105 border border-gray-100">
+                        <div class="w-20 h-20 bg-white rounded-full shadow-lg flex items-center justify-center mx-auto mb-4">
+                            <img src="/placeholder.svg?height=60&width=60&text=Bundesliga" alt="Bundesliga" class="w-12 h-12">
+                        </div>
+                        <h3 class="font-bold text-lg text-brand-dark mb-2">Bundesliga</h3>
+                        <p class="text-gray-600 text-sm">Alemania</p>
+                        <div class="mt-4 text-brand-red font-semibold">18+ Equipos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Choose Us -->
+    <section class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-brand-dark mb-4">
+                    ¿Por qué elegir Tarjeta Roja?
+                </h2>
+                <p class="text-xl text-gray-600">La mejor experiencia en camisas de fútbol</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-red rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-truck text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-brand-dark mb-4">Dropshipping Confiable</h3>
+                    <p class="text-gray-600">Sin inventario, sin riesgos. Enviamos directamente desde nuestros proveedores verificados.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-red rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-tags text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-brand-dark mb-4">Precios Competitivos</h3>
+                    <p class="text-gray-600">Ofrecemos los mejores precios del mercado tanto para compras al mayor como al detal.</p>
+                </div>
+
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-brand-red rounded-2xl flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-star text-white text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-brand-dark mb-4">Calidad Premium</h3>
+                    <p class="text-gray-600">Todas nuestras camisas son réplicas de alta calidad con acabados profesionales.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-brand-red">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">
+                ¿Listo para empezar tu negocio?
+            </h2>
+            <p class="text-xl text-red-100 mb-8">
+                Únete a nuestra red de distribuidores y comienza a vender las mejores camisas de fútbol
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a target="_blank" href="https://wa.me/584224292286?text=Hola, quiero vender sin inventario vengo desde la página web..." class="bg-white text-brand-red px-8 py-4 rounded-full font-semibold hover:bg-gray-100 transition-colors">
+                    <i class="fab fa-whatsapp mr-2"></i>
+                    Contactar por WhatsApp
+                </a>
+                <a href="/products" class="border-2 border-white text-white px-8 py-4 rounded-full font-semibold hover:bg-white hover:text-brand-red transition-colors">
+                    Ver Catálogo Completo
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-brand-dark text-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="mb-6">
+                        <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_5528.PNG-yBIkBJtv6VLL7DT7bmQgEF7Ifgm35x.png" alt="Tarjeta Roja" class="h-16 w-auto">
+                    </div>
+                    <p class="text-gray-400 mb-6 max-w-md">
+                        Tu tienda de confianza para las mejores camisas de fútbol en Venezuela. 
+                        Modalidad dropshipping con los mejores precios del mercado.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="https://www.instagram.com/tarjetaroja.ve/" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-brand-red transition-colors">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a target="_blank" href="https://wa.me/584224292286?text=Hola, quiero vender sin inventario vengo desde la página web..." class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-brand-red transition-colors">
+                            <i class="fab fa-whatsapp"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg mb-6">Enlaces</h3>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Productos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Equipos</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Mayoristas</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-colors">Contacto</a></li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-lg mb-6">Contacto</h3>
+                    <ul class="space-y-3 text-gray-400">
+                        <li class="flex items-center">
+                            <i class="fab fa-whatsapp mr-2"></i>
+                            +58 414-429-2286
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-envelope mr-2"></i>
+                            tarjetaroja.ve@gmail.com
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Venezuela
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Tarjeta Roja. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Stimulus Controllers
+        const application = Stimulus.Application.start();
+
+        // Header Controller
+        application.register("header", class extends Stimulus.Controller {
+            static targets = ["mobileMenu"];
+
+            toggleMobile() {
+                this.mobileMenuTarget.classList.toggle("hidden");
+            }
+        });
+
+        // Search Controller
+        application.register("search", class extends Stimulus.Controller {
+            static targets = ["input"];
+
+            connect() {
+                this.inputTarget.addEventListener("keypress", (e) => {
+                    if (e.key === "Enter") {
+                        this.search();
+                    }
+                });
+            }
+
+            search() {
+                const query = this.inputTarget.value;
+                console.log("Searching for:", query);
+                // Implement search functionality
+            }
+        });
+
+        // Products Controller
+        application.register("products", class extends Stimulus.Controller {
+            addToCart(event) {
+                const productCard = event.currentTarget.closest('.group');
+                const productName = productCard.querySelector('h3').textContent;
+                console.log("Added to cart:", productName);
+                
+                // Add visual feedback
+                event.currentTarget.innerHTML = '<i class="fas fa-check"></i>';
+                event.currentTarget.classList.add('bg-green-600');
+                
+                setTimeout(() => {
+                    event.currentTarget.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                    event.currentTarget.classList.remove('bg-green-600');
+                    event.currentTarget.classList.add('bg-brand-red');
+                }, 1000);
+            }
+        });
+
+        // Teams Controller
+        application.register("teams", class extends Stimulus.Controller {
+            selectTeam(event) {
+                const team = event.currentTarget.dataset.team;
+                console.log("Selected team:", team);
+            }
+
+            selectLeague(event) {
+                const league = event.currentTarget.dataset.league;
+                console.log("Selected league:", league);
+            }
+        });
+
+        // Cart Controller
+        application.register("cart", class extends Stimulus.Controller {
+            connect() {
+                this.count = 0;
+                this.updateDisplay();
+            }
+
+            addItem() {
+                this.count++;
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                const badge = this.element.querySelector("span");
+                if (badge) {
+                    badge.textContent = this.count;
+                }
+            }
+        });
+
+        // Hero Controller
+        application.register("hero", class extends Stimulus.Controller {
+            connect() {
+                console.log("Hero section loaded");
+            }
+        });
+
+        // Add event listeners for product buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            const addToCartButtons = document.querySelectorAll('.bg-brand-red');
+            addToCartButtons.forEach(button => {
+                if (button.querySelector('.fa-cart-plus')) {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const productCard = this.closest('.group');
+                        const productName = productCard.querySelector('h3').textContent;
+                        console.log("Added to cart:", productName);
+                        
+                        // Visual feedback
+                        this.innerHTML = '<i class="fas fa-check"></i>';
+                        this.classList.remove('bg-brand-red');
+                        this.classList.add('bg-green-600');
+                        
+                        setTimeout(() => {
+                            this.innerHTML = '<i class="fas fa-cart-plus"></i>';
+                            this.classList.remove('bg-green-600');
+                            this.classList.add('bg-brand-red');
+                        }, 1000);
+                    });
+                }
+            });
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Dropshipping Controller
+        application.register("dropshipping", class extends Stimulus.Controller {
+            connect() {
+                console.log("Dropshipping section loaded");
+                this.animateOnScroll();
+            }
+
+            animateOnScroll() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animate-fade-in');
+                        }
+                    });
+                });
+
+                const elements = this.element.querySelectorAll('.bg-white');
+                elements.forEach(el => observer.observe(el));
+            }
+        });
+    </script>
+</body>

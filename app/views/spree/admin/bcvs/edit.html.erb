@@ -1,0 +1,60 @@
+<% content_for :page_title do %>
+  Editar Tasa BCV
+<% end %>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Configuración de Tasa BCV</h3>
+      </div>
+      <div class="card-body">
+        <%= form_with model: [:admin, @bcv], local: true do |f| %>
+          <% if @bcv.errors.any? %>
+            <div class="alert alert-danger">
+              <h4><%= pluralize(@bcv.errors.count, "error") %> impidieron guardar:</h4>
+              <ul>
+                <% @bcv.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= f.label :value, 'Valor BCV' %>
+            <%= f.number_field :value, class: 'form-control', step: '0.0001', min: '0', required: true, placeholder: 'Ej: 36.5000' %>
+            <small class="form-text text-muted">Tasa de cambio oficial del BCV (Bolívares por Dólar)</small>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :value_whatsapp, 'Valor WhatsApp' %>
+            <%= f.number_field :value_whatsapp, class: 'form-control', step: '0.0001', min: '0', placeholder: 'Ej: 37.0000' %>
+            <small class="form-text text-muted">Tasa de cambio para notificaciones de WhatsApp</small>
+          </div>
+
+          <div class="form-actions mt-4">
+            <%= f.submit 'Actualizar BCV', class: 'btn btn-primary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Información del BCV</h4>
+      </div>
+      <div class="card-body">
+        <p><strong>ID:</strong> <%= @bcv.id %></p>
+        <p><strong>Valor actual:</strong> <%= number_with_precision(@bcv.value, precision: 2) %> Bs</p>
+        <p><strong>Valor WhatsApp:</strong> <%= number_with_precision(@bcv.value_whatsapp, precision: 2) %> Bs</p>
+        <hr>
+        <p><strong>Creado:</strong> <%= @bcv.created_at&.strftime('%d/%m/%Y %H:%M') || 'N/A' %></p>
+        <p><strong>Última actualización:</strong> <%= @bcv.updated_at&.strftime('%d/%m/%Y %H:%M') || 'N/A' %></p>
+      </div>
+    </div>
+  </div>
+</div>
+

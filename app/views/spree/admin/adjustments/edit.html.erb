@@ -1,0 +1,15 @@
+
+<% content_for :page_title do %>
+  <%= page_header_back_button spree.admin_order_adjustments_path(@order) %>
+  <%= Spree.t(:edit) %> <%= Spree.t(:adjustment) %>
+<% end %>
+
+<%= form_for [:admin, @order, @adjustment] do |f| %>
+  <div class="row">
+    <div class="col-lg-6 offset-lg-3">
+      <%= render partial: 'spree/admin/shared/error_messages', locals: { target: @adjustment } %>
+      <%= render 'form', f: f %>
+      <%= render 'spree/admin/shared/edit_resource_links', f: f %>
+    </div>
+  </div>
+<% end %> 

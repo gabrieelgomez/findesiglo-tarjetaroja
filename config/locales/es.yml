@@ -1,0 +1,140 @@
+es:
+  # Traducciones para el sistema de balance
+  balance:
+    title: "Movimientos"
+    balances: "Balances"
+    payment_method: "Método de pago"
+    current_balance: "Balance Actual"
+    total_profit: "Utilidad Total"
+    transactions: "Transacciones"
+    payment_state: "Estado del Pago"
+    description: "Descripción"
+    date: "Fecha"
+    amount: "Monto"
+    payment_reference: "Referencia Pago"
+    actions: "Acciones"
+    edit_order: "Editar Orden"
+    new_expense: "Nuevo Egreso"
+    
+  # Estados de pago
+  payment_states:
+    completed: "Completado"
+    pending: "Pendiente"
+    failed: "Fallido"
+    void: "Anulado"
+    
+  # Estados de gastos
+  expense_states:
+    pending: "Pendiente"
+    paid: "Pagado"
+    canceled: "Cancelado"
+    returned: "Devuelto"
+    
+  # Mensajes de tiempo
+  time:
+    ago: "Hace"
+    days: "días"
+    hours: "horas"
+    minutes: "minutos"
+    
+  # Mensajes del sistema
+  messages:
+    expense_created: "Gasto creado exitosamente"
+    expense_updated: "Gasto actualizado exitosamente"
+    expense_deleted: "Gasto borrado exitosamente"
+    sure_delete: "¿Estás seguro de borrar este gasto?"
+    
+  # Formularios
+  forms:
+    description: "Descripción"
+    amount: "Monto"
+    payment_method: "Método de Pago"
+    state: "Estado"
+    current_balance: "Balance Actual (opcional)"
+    is_transfer: "Es un traspaso entre métodos de pago"
+    submit: "Guardar"
+    cancel: "Cancelar"
+    edit: "Editar"
+    delete: "Borrar"
+    view: "Ver"
+    
+  # Filtros
+  filters:
+    state: "Estado"
+    payment_method: "Método de Pago"
+    transfer: "Traspaso"
+    all: "Todos"
+    yes: "Sí"
+    no: "No"
+    filter: "Filtrar"
+    
+  # Paginación
+  pagination:
+    previous: "Anterior"
+    next: "Siguiente"
+    page: "Página"
+    of: "de" 
+  # Traducciones para productos vendidos
+  sold_products: "Productos vendidos"
+  sold_products_list: "Lista de productos vendidos"
+  total_products_sold: "Total productos vendidos"
+  total_sales_value: "Valor total de ventas"
+  total_cost_value: "Valor total de costos"
+  no_sold_products: "No hay productos vendidos"
+  no_sold_products_description: "No se encontraron productos vendidos en el rango de fechas seleccionado"
+  filters: "Filtros"
+  start_date: "Fecha de inicio"
+  end_date: "Fecha de fin"
+  filter: "Filtrar"
+  reset: "Restablecer"
+  product: "Producto"
+  variant: "Variante"
+  quantity: "Cantidad"
+  sale_price: "Precio de venta"
+  cost_price: "Precio de costo"
+  order: "Pedido"
+  customer: "Cliente"
+  date: "Fecha"
+  payment_date: "Fecha de pago"
+  guest: "Invitado"
+  sku: "SKU"
+  size: "Talla"
+  dorsales: "Dorsales"
+  
+  # Traducciones para reporte de variantes vendidas
+  variants_sales_report: "Reporte de Variantes Vendidas"
+  variants_sales_ranking: "Ranking de Variantes por Ventas"
+  back_to_product: "Volver al Producto"
+  total_units_sold: "Total Unidades Vendidas"
+  total_revenue: "Ingresos Totales"
+  total_variants: "Total de Variantes"
+  quantity_sold: "Cantidad Vendida"
+  actions: "Acciones"
+  no_sales_for_this_product: "No hay ventas para este producto"
+  no_sales_for_this_product_description: "Este producto aún no tiene ventas registradas"
+  
+  # Traducciones para Top Variantes
+  top_variants: "Top Variantes"
+  top_variants_ranking: "Ranking de Variantes Más Vendidas"
+  variants_with_sales: "Variantes con Ventas"
+  per_page: "Por página"
+  showing: "Mostrando"
+  of: "de"
+  no_variants_sold: "No hay variantes vendidas"
+  no_variants_sold_description: "No se encontraron ventas en el rango de fechas seleccionado"
+  
+  # Traducciones para Top Productos
+  top_products: "Top Productos"
+  top_products_ranking: "Ranking de Productos Más Vendidos"
+  products_with_sales: "Productos con Ventas"
+  no_products_sold: "No hay productos vendidos"
+  no_products_sold_description: "No se encontraron ventas en el rango de fechas seleccionado"
+  
+  # Traducciones para Órdenes del Producto
+  product_orders: "Últimas Órdenes"
+  orders_list: "Listado de Órdenes"
+  total_orders: "Total de Órdenes"
+  variants_purchased: "Variantes Compradas"
+  state: "Estado"
+  no_orders_for_this_product: "No hay órdenes para este producto"
+  no_orders_for_this_product_description: "No se encontraron órdenes en el rango de fechas seleccionado"

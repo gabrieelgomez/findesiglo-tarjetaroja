@@ -1,0 +1,29 @@
+es:
+  activerecord:
+    attributes:
+      spree/address:
+        identifier: "Cédula de identidad"
+        agency: "Agencia de envío (Zoom o MRW)" 
+  # Productos vendidos
+  sold_products: "Productos vendidos"
+  sold_products_list: "Lista de productos vendidos"
+  total_products_sold: "Total productos vendidos"
+  total_sales_value: "Valor total de ventas"
+  total_cost_value: "Valor total de costos"
+  no_sold_products: "No hay productos vendidos"
+  no_sold_products_description: "No se encontraron productos vendidos en el rango de fechas seleccionado"
+  filters: "Filtros"
+  start_date: "Fecha de inicio"
+  end_date: "Fecha de fin"
+  filter: "Filtrar"
+  reset: "Restablecer"
+  product: "Producto"
+  variant: "Variante"
+  quantity: "Cantidad"
+  sale_price: "Precio de venta"
+  cost_price: "Precio de costo"
+  order: "Pedido"
+  customer: "Cliente"
+  date: "Fecha"
+  guest: "Invitado"
+  sku: "SKU"

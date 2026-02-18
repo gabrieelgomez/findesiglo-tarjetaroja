@@ -1,0 +1,82 @@
+<div class="card mb-3">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h1 class="card-title mb-0 h5">
+      <%= title %>
+    </h1>
+    <div class="d-flex gap-2">
+      <%= link_to "/admin/orders/#{@order.number}/adjustments", 
+          class: "btn btn-primary btn-sm d-flex align-items-center gap-1" do %>
+        <i class="fas fa-list"></i>
+        <%= Spree.t(:view_all_adjustments) %>
+      <% end %>
+      <%= link_to "/admin/orders/#{@order.number}/adjustments/new", 
+          class: "btn btn-primary btn-sm d-flex align-items-center gap-1" do %>
+        <i class="fas fa-plus"></i>
+        <%= Spree.t(:new_adjustment) %>
+      <% end %>
+    </div>
+  </div>
+  
+  <% if adjustments.eligible.exists? %>
+    <div class="table-responsive">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th><%= Spree.t('name') %></th>
+            <th><%= Spree.t('amount') %></th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="order-charges" data-hook="order_details_adjustments">
+          <% adjustments.eligible.group_by(&:label).each do |label, adjustments| %>
+            <% adjustments.each do |adjustment| %>
+              <tr>
+                <td>
+                  <strong><%= label %></strong>
+                </td>
+                <td>
+                  <span>
+                    <%= Spree::Money.new(
+                      adjustment.amount,
+                      currency: adjustment.order.try(:currency)
+                    ) %>
+                  </span>
+                </td>
+                <td class="text-center">
+                  <div class="d-flex gap-1 justify-content-center">
+                    <%= link_to "/admin/orders/#{@order.number}/adjustments/#{adjustment.id}/edit", 
+                        class: "btn btn-outline-primary btn-sm d-flex align-items-center gap-1",
+                        title: Spree.t(:edit) do %>
+                      <i class="fas fa-edit"></i>
+                      <span class="d-none d-sm-inline"><%= Spree.t(:edit) %></span>
+                    <% end %>
+                    <%= link_to "/admin/orders/#{@order.number}/adjustments/#{adjustment.id}", 
+                        method: :delete,
+                        data: { 
+                          confirm: Spree.t(:are_you_sure_delete),
+                          turbo_method: :delete
+                        },
+                        class: "btn btn-outline-danger btn-sm d-flex align-items-center gap-1",
+                        title: Spree.t(:delete) do %>
+                      <i class="fas fa-trash"></i>
+                      <span class="d-none d-sm-inline"><%= Spree.t(:delete) %></span>
+                    <% end %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <div class="card-body text-center py-4">
+      <p class="text-muted mb-3"><%= Spree.t(:no_adjustments_found) %></p>
+      <%= link_to "/admin/orders/#{@order.number}/adjustments/new", 
+          class: "btn btn-primary d-flex align-items-center gap-2 mx-auto" do %>
+        <i class="fas fa-plus"></i>
+        <%= Spree.t(:new_adjustment) %>
+      <% end %>
+    </div>
+  <% end %>
+</div> 

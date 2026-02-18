@@ -1,0 +1,33 @@
+<% content_for :page_title do %>
+  <%= page_header_back_button spree.edit_admin_order_path(@order) %>
+  <%= Spree.t(:adjustments) %>
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= link_to new_admin_order_adjustment_path(@order), 
+      class: "btn btn-primary d-flex align-items-center gap-2" do %>
+    <i class="fas fa-plus"></i>
+    <%= Spree.t(:new_adjustment) %>
+  <% end %>
+<% end %>
+
+<% if @adjustments.present? %>
+  <div class="card mb-3">
+    <%= render partial: 'adjustments_table' %>
+  </div>
+<% else %>
+  <div class="alert alert-warning">
+    <%= Spree.t(:no_resource_found, resource: plural_resource_name(Spree::Adjustment)) %>
+  </div>
+<% end %>
+
+<% if @order.can_add_coupon? %>
+  <div class="card bg-light mb-3" data-hook="adjustments_new_coupon_code">
+    <div class="card-body">
+      <div class="form-group">
+        <%= text_field_tag "coupon_code", "", placeholder: Spree.t(:coupon_code), class: "form-control" %>
+      </div>
+      <%= submit_tag Spree.t(:add_coupon_code), class: "btn btn-primary" %>
+    </div>
+  </div>
+<% end %> 
