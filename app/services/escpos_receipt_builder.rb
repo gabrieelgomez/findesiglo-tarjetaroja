@@ -46,7 +46,7 @@ class EscposReceiptBuilder
     address_section
     comments_section
     line_items_section if @order&.line_items&.any?
-    agency_section
+    # agency_section
     footer
     blank_lines(4)   # espacio en blanco antes del corte
     @buf << PARTIAL_CUT
@@ -77,7 +77,7 @@ class EscposReceiptBuilder
 
   def separator
     @buf << ALIGN_LEFT
-    @buf << ("-" * WIDTH) << LF
+    @buf << ("-" * 32) << LF
   end
 
   def blank_lines(n = 1)
@@ -112,27 +112,22 @@ class EscposReceiptBuilder
   end
 
   def recipient_section
-    line("DESTINATARIO", align: :left)
-    line(@address.full_name.present? ? @address.full_name : "N/A")
-    line("CEDULA", align: :left)
-    line(@address.identifier.present? ? @address.identifier : "N/A")
-    line("TELEFONO", align: :left)
-    line(@address.phone.present? ? @address.phone : "N/A")
+    line(@address.full_name.present? ? @address.full_name : "N/A", align: :left)
+    line(@address.identifier.present? ? @address.identifier : "N/A", align: :left)
+    line(@address.phone.present? ? @address.phone : "N/A", align: :left)
     separator
   end
 
   def address_section
-    line("DIRECCION DE ENTREGA", align: :left)
-    line(@address.address1.to_s)
-    line("CIUDAD", align: :left)
-    line(@address.city.present? ? @address.city.upcase : "N/A")
+    address_text = @address.address1.to_s.presence || "N/A"
+    line("DIRECCION ENTREGA: #{address_text}", align: :left)
+    line("CIUDAD: #{@address.city.present? ? @address.city.upcase : 'N/A'}", align: :left)
     separator
   end
 
   def comments_section
-    line("COMENTARIOS", align: :left)
     comments = @order&.special_instructions.present? ? @order.special_instructions : "N/A"
-    line(comments)
+    line("COMENTARIO: #{comments}", align: :left)
     separator
   end
 
@@ -140,7 +135,7 @@ class EscposReceiptBuilder
     line("ARTICULOS COMPRADOS", align: :left)
     total_qty = @order.line_items.sum(&:quantity)
     line("Total: #{total_qty} articulos")
-    blank_lines(2) # espacio después del total de artículos
+    separator
     @order.line_items.each_with_index do |li, idx|
       blank_lines(1) if idx > 0 # espacio entre cada artículo
       line(li.name.to_s.upcase)
@@ -152,10 +147,8 @@ class EscposReceiptBuilder
   end
 
   def agency_section
-    line("AGENCIA", align: :left)
-    line(@address.agency.present? ? @address.agency.upcase : "--")
-    line("ESTADO", align: :left)
-    line(@address.state_text.present? ? @address.state_text.upcase : "N/A")
+    line("AGENCIA: #{@address.agency.present? ? @address.agency.upcase : 'N/A'}", align: :left)
+    line("ESTADO: #{@address.state_text.present? ? @address.state_text.upcase : 'N/A'}", align: :left)
     separator
   end
 
@@ -164,7 +157,7 @@ class EscposReceiptBuilder
     if @order
       order_dt = @order.created_at
       @buf << ascii_only("Pedido: #{format_datetime(order_dt)}") << LF
-      @buf << "#ORD-#{@order.number}" << LF
+      @buf << ascii_only("Orden: #{@order.number}") << LF
     end
     @buf << ascii_only("Generado: #{format_datetime(Time.current)}") << LF
   end
