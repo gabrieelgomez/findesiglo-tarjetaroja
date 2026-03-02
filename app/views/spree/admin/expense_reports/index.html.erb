@@ -14,6 +14,14 @@
         <h3 class="card-title">Filtros</h3>
       </div>
       <div class="card-body">
+        <% report_filter_params = { start_date: @start_date.strftime('%Y-%m-%d'), end_date: @end_date.strftime('%Y-%m-%d') }; report_filter_params[:category_type] = @category_type_filter if @category_type_filter.present?; report_filter_params[:exclude_inventory] = '1' if @exclude_inventory %>
+        <% if @category_filter_id.present? %>
+          <p class="mb-2 text-muted">
+            <strong>Filtro por categoría:</strong>
+            <%= @category_filter == :uncategorized ? 'Sin Categorizar' : @category_filter&.name %>
+            <%= link_to '(Quitar)', spree.admin_expense_reports_path(report_filter_params), class: 'ml-2' %>
+          </p>
+        <% end %>
         <%= form_tag spree.admin_expense_reports_path, method: :get, class: "form-inline" do %>
           <div class="form-group mr-3">
             <label class="mr-2">Desde:</label>
@@ -32,6 +40,19 @@
               ['Gastos de Inversión', 'gasto_inversion'],
               ['Gastos de Inventario', 'gasto_inventario']
             ], @category_type_filter), class: 'form-control' %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Categoría:</label>
+            <%= select_tag :category_id, options_for_select(
+              [['Todas las categorías', '']] + @expense_categories.map { |c| [c.name, c.id] } + [['Sin Categorizar', 'uncategorized']],
+              @category_filter_id
+            ), class: 'form-control' %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">
+              <%= check_box_tag :exclude_inventory, '1', @exclude_inventory, class: 'mr-1' %>
+              Excluir gastos de inventario
+            </label>
           </div>
           <div class="form-group">
             <%= submit_tag 'Filtrar', class: 'btn btn-primary' %>
@@ -143,17 +164,19 @@
               </tr>
             </thead>
             <tbody>
-              <% @by_category.each do |category_name, amount| %>
+              <% @by_category.each do |(cat_id, category_name), amount| %>
+                <% link_params = { start_date: @start_date.strftime('%Y-%m-%d'), end_date: @end_date.strftime('%Y-%m-%d'), category_id: cat_id }; link_params[:category_type] = @category_type_filter if @category_type_filter.present?; link_params[:exclude_inventory] = '1' if @exclude_inventory %>
                 <tr>
-                  <td><%= category_name %></td>
-                  <td class="text-right"><%= number_to_currency(amount, unit: '$', precision: 2) %></td>
+                  <td><%= link_to category_name, spree.admin_expense_reports_path(link_params), class: 'text-primary' %></td>
+                  <td class="text-right"><%= link_to number_to_currency(amount, unit: '$', precision: 2), spree.admin_expense_reports_path(link_params), class: 'text-primary' %></td>
                   <td class="text-right"><%= @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%' %></td>
                 </tr>
               <% end %>
               <% if @uncategorized_total > 0 %>
+                <% uncat_params = { start_date: @start_date.strftime('%Y-%m-%d'), end_date: @end_date.strftime('%Y-%m-%d'), category_id: 'uncategorized' }; uncat_params[:category_type] = @category_type_filter if @category_type_filter.present?; uncat_params[:exclude_inventory] = '1' if @exclude_inventory %>
                 <tr class="table-secondary">
-                  <td><em>Sin Categoría</em></td>
-                  <td class="text-right"><%= number_to_currency(@uncategorized_total, unit: '$', precision: 2) %></td>
+                  <td><%= link_to 'Sin Categoría', spree.admin_expense_reports_path(uncat_params), class: 'text-primary font-italic' %></td>
+                  <td class="text-right"><%= link_to number_to_currency(@uncategorized_total, unit: '$', precision: 2), spree.admin_expense_reports_path(uncat_params), class: 'text-primary' %></td>
                   <td class="text-right"><%= @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%' %></td>
                 </tr>
               <% end %>

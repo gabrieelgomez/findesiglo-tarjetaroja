@@ -5,26 +5,42 @@ module Spree
         @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.current.beginning_of_month
         @end_date = params[:end_date].present? ? Date.parse(params[:end_date]) : Date.current
         @category_type_filter = params[:category_type]
+        @exclude_inventory = params[:exclude_inventory].present?
+        @category_filter_id = params[:category_id].presence
 
         base_scope = current_store.expenses
                           .where(traspaso: false)
                           .where.not(state: :canceled)
                           .where(created_at: @start_date.beginning_of_day..@end_date.end_of_day)
 
+        if @exclude_inventory
+          inventario_ids = current_store.expense_categories.where(category_type: :gasto_inventario).pluck(:id)
+          base_scope = base_scope.where(
+            "expenses.expense_category_id IS NULL OR expenses.expense_category_id NOT IN (?)",
+            inventario_ids.presence || [0]
+          )
+        end
+
         if @category_type_filter.present?
           category_ids = current_store.expense_categories.where(category_type: @category_type_filter).pluck(:id)
           base_scope = base_scope.where(expense_category_id: category_ids)
+        end
+
+        if @category_filter_id.present?
+          if @category_filter_id == 'uncategorized'
+            base_scope = base_scope.where(expense_category_id: nil)
+          else
+            base_scope = base_scope.where(expense_category_id: @category_filter_id)
+          end
         end
 
         @expenses = base_scope.includes(:expense_category, :spree_payment_method).order(created_at: :desc)
 
         @total_amount = base_scope.sum(:amount)
 
-        @by_category = base_scope
-          .joins(:expense_category)
-          .group('expense_categories.name')
-          .sum(:amount)
-          .sort_by { |_, v| -v }
+        # [ [id, name], amount ] para poder enlazar por categoría
+        by_cat_raw = base_scope.joins(:expense_category).group('expense_categories.id', 'expense_categories.name').sum(:amount)
+        @by_category = by_cat_raw.sort_by { |_, v| -v }
 
         raw_by_type = base_scope
           .joins(:expense_category)
@@ -47,6 +63,11 @@ module Spree
         @uncategorized_total = base_scope.where(expense_category_id: nil).sum(:amount)
 
         @expense_categories = current_store.expense_categories.ordered
+        @category_filter = if @category_filter_id == 'uncategorized'
+                             :uncategorized
+                           elsif @category_filter_id.present?
+                             current_store.expense_categories.find_by(id: @category_filter_id)
+                           end
       end
     end
   end
