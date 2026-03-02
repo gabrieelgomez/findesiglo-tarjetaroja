@@ -1,4 +1,5 @@
 <% if can? [:admin, :operator], Spree::Order %>
     <%= nav_item 'Balance', spree.admin_transactions_path(per_page: 50), icon: 'chart-bar', active: controller_name == 'transactions' && action_name == 'index' %>
     <%= nav_item 'Cuadre Diario', spree.daily_balance_admin_transactions_path(q: { created_at_gt: Date.current.strftime('%Y-%m-%d') }), icon: 'calendar', active: controller_name == 'transactions' && action_name == 'daily_balance' %>
+    <%= nav_item 'Reporte Egresos', spree.admin_expense_reports_path, icon: 'chart-pie', active: controller_name == 'expense_reports' %>
 <% end %>

@@ -232,6 +232,8 @@
 
             <td class="actions">
               <span class="d-flex justify-content-center transaction-action-buttons">
+                <%= link_to_with_icon('edit.svg', 'Editar egreso', spree.edit_admin_expense_path(transaction),
+                class: 'btn btn-warning btn-sm icon-link with-tip', no_text: true) %>
                 <%= link_to_with_icon('delete.svg', t('forms.delete'), spree.admin_expense_path(transaction),
                 class: 'btn btn-danger btn-sm icon-link with-tip', data: { turbo_method: :delete, turbo_confirm: t('messages.sure_delete') }, no_text: true) %>
               </span>

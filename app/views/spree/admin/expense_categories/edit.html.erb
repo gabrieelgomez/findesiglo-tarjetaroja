@@ -1,0 +1,58 @@
+<% content_for :page_title do %>
+  Editar Categoría: <%= @expense_category.name %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Editar Categoría</h3>
+      </div>
+      <div class="card-body">
+        <%= form_with model: [:admin, @expense_category], local: true do |f| %>
+          <% if @expense_category.errors.any? %>
+            <div class="alert alert-danger">
+              <ul>
+                <% @expense_category.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= f.label :name, 'Nombre' %>
+            <%= f.text_field :name, class: 'form-control', required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :category_type, 'Tipo de Gasto' %>
+            <%= f.select :category_type, ExpenseCategory::CATEGORY_TYPE_LABELS.map { |k, v| [v, k] }, {}, { class: 'form-control' } %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :position, 'Posición' %>
+            <%= f.number_field :position, class: 'form-control', min: 0 %>
+          </div>
+
+          <div class="form-actions">
+            <%= f.submit 'Actualizar Categoría', class: 'btn btn-primary' %>
+            <%= link_to 'Cancelar', spree.admin_expense_categories_path, class: 'btn btn-secondary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Información</h4>
+      </div>
+      <div class="card-body">
+        <p><strong>Gastos asociados:</strong> <%= @expense_category.expenses.count %></p>
+        <p><strong>Creada:</strong> <%= @expense_category.created_at.strftime('%d/%m/%Y %H:%M') %></p>
+      </div>
+    </div>
+  </div>
+</div>

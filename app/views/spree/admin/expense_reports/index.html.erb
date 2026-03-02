@@ -1,0 +1,270 @@
+<% content_for :page_title do %>
+  Reporte de Egresos
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= link_to 'Gastos', spree.admin_expenses_path, class: 'btn btn-outline-secondary' %>
+  <%= link_to 'Categorías', spree.admin_expense_categories_path, class: 'btn btn-outline-secondary' %>
+<% end %>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Filtros</h3>
+      </div>
+      <div class="card-body">
+        <%= form_tag spree.admin_expense_reports_path, method: :get, class: "form-inline" do %>
+          <div class="form-group mr-3">
+            <label class="mr-2">Desde:</label>
+            <%= date_field_tag :start_date, @start_date, class: 'form-control' %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Hasta:</label>
+            <%= date_field_tag :end_date, @end_date, class: 'form-control' %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Tipo:</label>
+            <%= select_tag :category_type, options_for_select([
+              ['Todos los tipos', ''],
+              ['Gastos Fijos', 'gasto_fijo'],
+              ['Gastos Variables', 'gasto_variable'],
+              ['Gastos de Inversión', 'gasto_inversion'],
+              ['Gastos de Inventario', 'gasto_inventario']
+            ], @category_type_filter), class: 'form-control' %>
+          </div>
+          <div class="form-group">
+            <%= submit_tag 'Filtrar', class: 'btn btn-primary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4 expense-report-cards">
+  <div class="col-6 col-md-2 mb-3 mb-md-0">
+    <div class="card bg-danger text-white h-100">
+      <div class="card-body text-center d-flex flex-column justify-content-center">
+        <h5 class="card-title mb-1">Total Egresos</h5>
+        <h2 class="card-amount mb-1"><%= number_to_currency(@total_amount, unit: '$', precision: 2) %></h2>
+        <small class="text-white-50"><%= @start_date.strftime('%d/%m/%Y') %> - <%= @end_date.strftime('%d/%m/%Y') %></small>
+      </div>
+    </div>
+  </div>
+  <% type_labels = { 0 => 'Gastos Fijos', 1 => 'Gastos Variables', 2 => 'Gastos de Inversión', 3 => 'Gastos de Inventario' } %>
+  <% type_colors = { 0 => 'primary', 1 => 'warning', 2 => 'info', 3 => 'purple' } %>
+  <% [0, 1, 2, 3].each do |type_val| %>
+    <% amount = @by_category_type[type_val] || @by_category_type[type_val.to_s] || 0 %>
+    <div class="col-6 col-md-2 mb-3 mb-md-0">
+      <div class="card bg-<%= type_colors[type_val] || 'secondary' %> text-white h-100">
+        <div class="card-body text-center d-flex flex-column justify-content-center">
+          <h5 class="card-title mb-1"><%= type_labels[type_val] %></h5>
+          <h2 class="card-amount mb-1"><%= number_to_currency(amount, unit: '$', precision: 2) %></h2>
+          <small class="text-white-50"><%= @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%' %></small>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <% if @uncategorized_total > 0 %>
+    <div class="col-6 col-md-2 mb-3 mb-md-0">
+      <div class="card bg-secondary text-white h-100">
+        <div class="card-body text-center d-flex flex-column justify-content-center">
+          <h5 class="card-title mb-1">Sin Categorizar</h5>
+          <h2 class="card-amount mb-1"><%= number_to_currency(@uncategorized_total, unit: '$', precision: 2) %></h2>
+          <small class="text-white-50"><%= @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%' %></small>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title mb-0">Egresos por tipo de gasto</h4>
+      </div>
+      <div class="card-body py-2">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th class="text-right">Monto</th>
+                <th class="text-right">% del total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% [0, 1, 2, 3].each do |type_val| %>
+                <% amount = @by_category_type[type_val] || @by_category_type[type_val.to_s] || 0 %>
+                <tr>
+                  <td><span class="badge badge-<%= type_colors[type_val] %>"><%= type_labels[type_val] %></span></td>
+                  <td class="text-right"><%= number_to_currency(amount, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+              <% if @uncategorized_total > 0 %>
+                <tr class="table-secondary">
+                  <td><em>Sin categoría</em></td>
+                  <td class="text-right"><%= number_to_currency(@uncategorized_total, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+            </tbody>
+            <tfoot>
+              <tr class="table-dark">
+                <td><strong>TOTAL</strong></td>
+                <td class="text-right"><strong><%= number_to_currency(@total_amount, unit: '$', precision: 2) %></strong></td>
+                <td class="text-right"><strong>100%</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Egresos por Categoría</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th class="text-right">Monto</th>
+                <th class="text-right">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @by_category.each do |category_name, amount| %>
+                <tr>
+                  <td><%= category_name %></td>
+                  <td class="text-right"><%= number_to_currency(amount, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+              <% if @uncategorized_total > 0 %>
+                <tr class="table-secondary">
+                  <td><em>Sin Categoría</em></td>
+                  <td class="text-right"><%= number_to_currency(@uncategorized_total, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+            </tbody>
+            <tfoot>
+              <tr class="table-dark">
+                <td><strong>TOTAL</strong></td>
+                <td class="text-right"><strong><%= number_to_currency(@total_amount, unit: '$', precision: 2) %></strong></td>
+                <td class="text-right"><strong>100%</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Egresos por Método de Pago</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Método de Pago</th>
+                <th class="text-right">Monto</th>
+                <th class="text-right">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @by_payment_method.each do |method_name, amount| %>
+                <tr>
+                  <td><%= method_name %></td>
+                  <td class="text-right"><%= number_to_currency(amount, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+            </tbody>
+            <tfoot>
+              <tr class="table-dark">
+                <td><strong>TOTAL</strong></td>
+                <td class="text-right"><strong><%= number_to_currency(@total_amount, unit: '$', precision: 2) %></strong></td>
+                <td class="text-right"><strong>100%</strong></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Detalle de Egresos (<%= @expenses.count %> registros)</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped table-sm">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Tipo</th>
+                <th>Método de Pago</th>
+                <th class="text-right">Monto</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @expenses.each do |expense| %>
+                <tr>
+                  <td><%= expense.created_at.strftime('%d/%m/%Y %H:%M') %></td>
+                  <td><%= truncate(expense.description, length: 50) %></td>
+                  <td>
+                    <% if expense.expense_category %>
+                      <%= expense.expense_category.name %>
+                    <% else %>
+                      <em class="text-muted">Sin categoría</em>
+                    <% end %>
+                  </td>
+                  <td>
+                    <% if expense.expense_category %>
+                      <span class="badge badge-<%= case expense.expense_category.category_type
+                                                    when 'gasto_fijo' then 'primary'
+                                                    when 'gasto_variable' then 'warning'
+                                                    when 'gasto_inversion' then 'info'
+                                                    when 'gasto_inventario' then 'purple'
+                                                    else 'secondary'
+                                                    end %>">
+                        <%= expense.expense_category.type_label %>
+                      </span>
+                    <% end %>
+                  </td>
+                  <td><%= expense.spree_payment_method.name %></td>
+                  <td class="text-right"><%= number_to_currency(expense.amount, unit: '$', precision: 2) %></td>
+                  <td class="text-center">
+                    <%= link_to 'Editar', spree.edit_admin_expense_path(expense), class: 'btn btn-sm btn-warning' %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

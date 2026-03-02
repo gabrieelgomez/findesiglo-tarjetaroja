@@ -4,6 +4,68 @@
 
 <% content_for :page_actions do %>
   <%= button_link_to 'Nuevo Gasto', spree.new_admin_expense_path, class: "btn-success", icon: 'add.svg' %>
+  <%= link_to 'Categorías', spree.admin_expense_categories_path, class: 'btn btn-outline-secondary' %>
+  <%= link_to 'Reporte', spree.admin_expense_reports_path, class: 'btn btn-outline-info' %>
+<% end %>
+
+<% type_labels = { 0 => 'Gastos Fijos', 1 => 'Gastos Variables', 2 => 'Gastos de Inversión', 3 => 'Gastos de Inventario', 'gasto_fijo' => 'Gastos Fijos', 'gasto_variable' => 'Gastos Variables', 'gasto_inversion' => 'Gastos de Inversión', 'gasto_inventario' => 'Gastos de Inventario' } %>
+<% type_colors = { 0 => 'primary', 1 => 'warning', 2 => 'info', 3 => 'purple', 'gasto_fijo' => 'primary', 'gasto_variable' => 'warning', 'gasto_inversion' => 'info', 'gasto_inventario' => 'purple' } %>
+
+<div class="row mb-4">
+  <div class="col-md-3">
+    <div class="card bg-danger text-white">
+      <div class="card-body text-center py-3">
+        <h6 class="mb-1">Total Egresos</h6>
+        <h3 class="mb-0"><%= number_to_currency(@total_expenses, unit: '$', precision: 2) %></h3>
+        <small>Sin traspasos ni cancelados</small>
+      </div>
+    </div>
+  </div>
+  <% @total_by_category_type.each do |type_val, amount| %>
+    <div class="col-md-3">
+      <div class="card bg-<%= type_colors[type_val] || 'secondary' %> text-white">
+        <div class="card-body text-center py-3">
+          <h6 class="mb-1"><%= type_labels[type_val] || 'Otros' %></h6>
+          <h3 class="mb-0"><%= number_to_currency(amount, unit: '$', precision: 2) %></h3>
+          <small><%= @total_expenses > 0 ? "#{(amount / @total_expenses * 100).round(1)}%" : '0%' %></small>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<% if @total_by_category.any? %>
+<div class="row mb-4">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h5 class="card-title mb-0">Resumen por Categoría <small class="text-muted">(sin traspasos)</small></h5>
+      </div>
+      <div class="card-body py-2">
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>Categoría</th>
+                <th class="text-right">Monto</th>
+                <th class="text-right">%</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @total_by_category.first(10).each do |cat_name, amount| %>
+                <tr>
+                  <td><%= cat_name %></td>
+                  <td class="text-right"><%= number_to_currency(amount, unit: '$', precision: 2) %></td>
+                  <td class="text-right"><%= @total_expenses > 0 ? "#{(amount / @total_expenses * 100).round(1)}%" : '0%' %></td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <% end %>
 
 <div class="row">
@@ -21,6 +83,10 @@
           <div class="form-group mr-3">
             <label class="mr-2">Método de Pago:</label>
             <%= f.collection_select :spree_payment_method_id_eq, Spree::PaymentMethod.where(active: true), :id, :name, { prompt: 'Todos' }, { class: 'form-control' } %>
+          </div>
+          <div class="form-group mr-3">
+            <label class="mr-2">Categoría:</label>
+            <%= f.collection_select :expense_category_id_eq, @expense_categories, :id, :name, { prompt: 'Todas' }, { class: 'form-control' } %>
           </div>
           <div class="form-group mr-3">
             <label class="mr-2">Traspaso:</label>
@@ -48,6 +114,7 @@
               <tr>
                 <th>ID</th>
                 <th>Descripción</th>
+                <th>Categoría</th>
                 <th>Monto</th>
                 <th>Estado</th>
                 <th>Método de Pago</th>
@@ -61,6 +128,21 @@
                 <tr>
                   <td><%= expense.id %></td>
                   <td><%= expense.description %></td>
+                  <td>
+                    <% if expense.expense_category %>
+                      <span class="badge badge-<%= case expense.expense_category.category_type
+                                                    when 'gasto_fijo' then 'primary'
+                                                    when 'gasto_variable' then 'warning'
+                                                    when 'gasto_inversion' then 'info'
+                                                    when 'gasto_inventario' then 'purple'
+                                                    else 'secondary'
+                                                    end %>">
+                        <%= expense.expense_category.name %>
+                      </span>
+                    <% else %>
+                      <span class="badge badge-secondary">Sin categoría</span>
+                    <% end %>
+                  </td>
                   <td><span class="badge badge-danger"><%= expense.amount %></span></td>
                   <td>
                     <span class="badge badge-<%= case expense.state
@@ -110,4 +192,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>

@@ -71,6 +71,7 @@ module Spree
     # has_many :reimbursements, through: :orders, class_name: 'Spree::Reimbursement' FIXME: we should fetch this via Customer Return
 
     has_many :expenses, class_name: '::Expense', foreign_key: :store_id
+    has_many :expense_categories, class_name: '::ExpenseCategory', foreign_key: :store_id
 
     has_many :store_payment_methods, class_name: 'Spree::StorePaymentMethod'
     has_many :payment_methods, through: :store_payment_methods, class_name: 'Spree::PaymentMethod'

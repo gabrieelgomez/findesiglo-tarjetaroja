@@ -55,6 +55,8 @@ Rails.application.routes.draw do
         end
       end
       resources :expenses
+      resources :expense_categories
+      resources :expense_reports, only: [:index]
       
       # Sold products routes
       resources :sold_products, only: [:index]

@@ -2,14 +2,29 @@ module Spree
   module Admin
     class ExpensesController < Spree::Admin::BaseController
       before_action :load_expense, only: [:edit, :update, :destroy]
+      before_action :load_categories, only: [:new, :edit, :create, :update]
 
       def index
-        @expenses = current_store.expenses
-                          .includes(:spree_payment_method, :spree_admin_user)
+        @search = current_store.expenses
+                          .includes(:spree_payment_method, :spree_admin_user, :expense_category)
                           .ransack(params[:q])
-                          .result
+        @expenses = @search.result
+                          .order(created_at: :desc)
                           .page(params[:page])
                           .per(params[:per_page] || 25)
+        @expense_categories = current_store.expense_categories.ordered
+
+        real_expenses = current_store.expenses.where(traspaso: false).where.not(state: :canceled)
+        @total_expenses = real_expenses.sum(:amount)
+        @total_by_category_type = real_expenses
+          .joins(:expense_category)
+          .group('expense_categories.category_type')
+          .sum(:amount)
+        @total_by_category = real_expenses
+          .joins(:expense_category)
+          .group('expense_categories.name')
+          .sum(:amount)
+          .sort_by { |_, v| -v }
       end
 
       def new
@@ -53,8 +68,12 @@ module Spree
         @expense = current_store.expenses.find(params[:id])
       end
 
+      def load_categories
+        @expense_categories = current_store.expense_categories.ordered
+      end
+
       def expense_params
-        params.require(:expense).permit(:amount, :state, :current_balance, :description, :spree_payment_method_id, :traspaso)
+        params.require(:expense).permit(:amount, :state, :current_balance, :description, :spree_payment_method_id, :traspaso, :expense_category_id)
       end
     end
   end

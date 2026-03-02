@@ -32,6 +32,11 @@
           </div>
 
           <div class="form-group">
+            <%= f.label :expense_category_id, 'Categoría' %>
+            <%= f.collection_select :expense_category_id, @expense_categories, :id, :name, { prompt: 'Seleccione una categoría' }, { class: 'form-control' } %>
+          </div>
+
+          <div class="form-group">
             <%= f.label :spree_payment_method_id, 'Método de Pago' %>
             <%= f.collection_select :spree_payment_method_id, Spree::PaymentMethod.where(active: true), :id, :name, { prompt: 'Seleccione un método de pago' }, { class: 'form-control', required: true } %>
           </div>
@@ -70,9 +75,10 @@
       <div class="card-body">
         <p><strong>Descripción:</strong> Describe detalladamente el gasto realizado.</p>
         <p><strong>Monto:</strong> Ingresa el monto exacto del gasto.</p>
+        <p><strong>Categoría:</strong> Clasifica el gasto para mejor control.</p>
         <p><strong>Método de Pago:</strong> Selecciona el método de pago utilizado.</p>
         <p><strong>Estado:</strong> El estado por defecto es "pending".</p>
       </div>
     </div>
   </div>
-</div> 
+</div>

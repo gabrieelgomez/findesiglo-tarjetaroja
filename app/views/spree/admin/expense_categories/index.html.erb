@@ -1,0 +1,63 @@
+<% content_for :page_title do %>
+  Categorías de Egresos
+<% end %>
+
+<% content_for :page_actions do %>
+  <%= button_link_to 'Nueva Categoría', spree.new_admin_expense_category_path, class: "btn-success", icon: 'add.svg' %>
+  <%= link_to 'Gastos', spree.admin_expenses_path, class: 'btn btn-outline-secondary' %>
+  <%= link_to 'Reporte', spree.admin_expense_reports_path, class: 'btn btn-outline-info' %>
+<% end %>
+
+<div class="row">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">Categorías</h4>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Posición</th>
+                <th>Nombre</th>
+                <th>Tipo</th>
+                <th>Gastos Asociados</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% @expense_categories.each do |category| %>
+                <tr>
+                  <td><%= category.position %></td>
+                  <td><strong><%= category.name %></strong></td>
+                  <td>
+                    <span class="badge badge-<%= case category.category_type
+                                                  when 'gasto_fijo' then 'primary'
+                                                  when 'gasto_variable' then 'warning'
+                                                  when 'gasto_inversion' then 'info'
+                                                  when 'gasto_inventario' then 'purple'
+                                                  else 'secondary'
+                                                  end %>">
+                      <%= category.type_label %>
+                    </span>
+                  </td>
+                  <td><%= category.expenses.count %></td>
+                  <td>
+                    <div class="btn-group" role="group">
+                      <%= link_to 'Editar', spree.edit_admin_expense_category_path(category), class: 'btn btn-sm btn-warning' %>
+                      <% unless category.name == 'Sin Categoría' %>
+                        <%= link_to 'Eliminar', spree.admin_expense_category_path(category), method: :delete, class: 'btn btn-sm btn-danger',
+                            data: { confirm: "¿Eliminar '#{category.name}'? Los gastos asociados se moverán a 'Sin Categoría'." } %>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

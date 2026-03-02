@@ -151,6 +151,18 @@
           <%= Spree.t(:reports) %>
         <% end %>
       </li>
+      <li class="nav-item">
+        <%= active_link_to spree.admin_expense_reports_path, class: 'nav-link', active: controller_name == 'expense_reports' do %>
+          <%= icon 'chart-pie' %>
+          Reporte Egresos
+        <% end %>
+      </li>
+      <li class="nav-item">
+        <%= active_link_to spree.admin_expense_categories_path, class: 'nav-link', active: controller_name == 'expense_categories' do %>
+          <%= icon 'tags' %>
+          Categorías de Egresos
+        <% end %>
+      </li>
     <% end %>
 
     <% unless operator %>

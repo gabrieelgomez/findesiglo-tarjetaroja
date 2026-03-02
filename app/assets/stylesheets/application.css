@@ -751,3 +751,7 @@
     padding: 0.5rem 1rem;
   }
 }
+
+/* Gastos de Inventario - morado */
+.bg-purple, .card.bg-purple { background-color: #6f42c1 !important; color: #fff !important; }
+.badge-purple { background-color: #6f42c1; color: #fff; }

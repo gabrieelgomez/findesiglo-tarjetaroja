@@ -25,6 +25,24 @@
               
               <dt>Monto:</dt>
               <dd><span class="badge badge-danger"><%= @expense.amount %></span></dd>
+
+              <dt>Categoría:</dt>
+              <dd>
+                <% if @expense.expense_category %>
+                  <span class="badge badge-<%= case @expense.expense_category.category_type
+                                                when 'gasto_fijo' then 'primary'
+                                                when 'gasto_variable' then 'warning'
+                                                when 'gasto_inversion' then 'info'
+                                                when 'gasto_inventario' then 'purple'
+                                                else 'secondary'
+                                                end %>">
+                    <%= @expense.expense_category.name %>
+                  </span>
+                  <small class="text-muted">(<%= @expense.expense_category.type_label %>)</small>
+                <% else %>
+                  <span class="badge badge-secondary">Sin categoría</span>
+                <% end %>
+              </dd>
             </dl>
           </div>
           <div class="col-md-6">
@@ -88,4 +106,4 @@
       </div>
     </div>
   </div>
-</div> 
+</div>
