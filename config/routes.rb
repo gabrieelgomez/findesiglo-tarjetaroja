@@ -30,6 +30,8 @@ Rails.application.routes.draw do
       router_name: :spree
     )
     
+    get 'products/slugs', to: 'products#slugs', defaults: { format: :json }
+
     # Admin address images routes
     namespace :admin do
       resources :address_images, only: [:show] do

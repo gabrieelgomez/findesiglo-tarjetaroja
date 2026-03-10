@@ -1,0 +1,164 @@
+<% admin_user = try_spree_current_user || (current_admin_user rescue nil) %>
+<% if product.json_stock_url.present? && admin_user&.has_spree_role?('admin') %>
+  <% local_data = product_as_json(product) %>
+  <% bcv_rate = Bcv.last&.value %>
+
+  <script type="application/json" id="sc_local_data"><%= raw local_data.to_json %></script>
+
+  <div class="stock-comparison mt-6" id="stock-comparison-section"
+       data-json-url="<%= product.json_stock_url %>"
+       data-local-store="<%= current_store.name %>"
+       data-bcv-rate="<%= bcv_rate.to_f %>">
+
+    <div id="sc_loading" class="text-center py-4">
+      <p class="text-sm text-gray-500">Cargando disponibilidad...</p>
+    </div>
+
+    <div id="sc_error" class="hidden">
+      <p class="text-sm text-red-500" id="sc_error_msg"></p>
+    </div>
+
+    <div id="sc_external" class="hidden mb-6">
+      <h3 class="text-sm uppercase tracking-widest font-bold mb-2" id="sc_external_title"></h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2 font-medium">Variante</th>
+              <th class="text-right py-2 font-medium">Precio</th>
+              <th class="text-right py-2 font-medium">Precio Bs</th>
+              <th class="text-right py-2 font-medium">Stock</th>
+            </tr>
+          </thead>
+          <tbody id="sc_external_tbody"></tbody>
+          <tfoot>
+            <tr class="border-t border-gray-300 font-bold">
+              <td colspan="3" class="text-right py-2">Total:</td>
+              <td class="text-right py-2" id="sc_external_total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="sc_external_empty" class="hidden">
+        <p class="text-sm text-gray-500 italic py-2"></p>
+      </div>
+    </div>
+
+    <div id="sc_local" class="hidden">
+      <h3 class="text-sm uppercase tracking-widest font-bold mb-2" id="sc_local_title"></h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-2 font-medium">Variante</th>
+              <th class="text-right py-2 font-medium">Precio</th>
+              <th class="text-right py-2 font-medium">Precio Bs</th>
+              <th class="text-right py-2 font-medium">Stock</th>
+            </tr>
+          </thead>
+          <tbody id="sc_local_tbody"></tbody>
+          <tfoot>
+            <tr class="border-t border-gray-300 font-bold">
+              <td colspan="3" class="text-right py-2">Total:</td>
+              <td class="text-right py-2" id="sc_local_total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="sc_local_empty" class="hidden">
+        <p class="text-sm text-gray-500 italic py-2"></p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var container = document.getElementById("stock-comparison-section");
+      if (!container || container.dataset.loaded) return;
+      container.dataset.loaded = "true";
+
+      var jsonUrl = container.dataset.jsonUrl;
+      var localData = JSON.parse(document.getElementById("sc_local_data").textContent);
+      var localStoreName = container.dataset.localStore;
+      var bcvRate = parseFloat(container.dataset.bcvRate) || 0;
+
+      function esc(text) {
+        if (!text) return "";
+        var d = document.createElement("div");
+        d.textContent = text;
+        return d.innerHTML;
+      }
+
+      function renderTable(data, tbodyId, totalId) {
+        var tbody = document.getElementById(tbodyId);
+        var totalEl = document.getElementById(totalId);
+        var priceBcv = data.price_bcv || 0;
+        var variants = [];
+        if (data.master) variants.push(data.master);
+        if (data.variants && data.variants.length > 0) {
+          data.variants.forEach(function(v) { variants.push(v); });
+        }
+
+        var total = 0;
+        var rows = "";
+
+        variants.forEach(function(v) {
+          if (v.is_master && variants.length > 1) return;
+          var onHand = v.total_on_hand != null ? v.total_on_hand : 0;
+          if (onHand <= 0) return;
+          total += onHand;
+
+          var name = v.options_text || v.name || "Master";
+          var price = v.price != null ? v.price.toFixed(2) : "-";
+          var priceBs = priceBcv > 0 ? priceBcv.toFixed(2) : "-";
+
+          var stockColor = onHand <= 5 ? "text-yellow-600" : "text-green-600";
+
+          rows += '<tr class="border-b border-gray-100">' +
+            '<td class="py-2">' + esc(name) + '</td>' +
+            '<td class="text-right py-2">' + price + '</td>' +
+            '<td class="text-right py-2">' + priceBs + '</td>' +
+            '<td class="text-right py-2 ' + stockColor + ' font-semibold">' + onHand + '</td>' +
+            '</tr>';
+        });
+
+        tbody.innerHTML = rows;
+        totalEl.textContent = total;
+        return total > 0;
+      }
+
+      fetch(jsonUrl, { headers: { "Accept": "application/json" } })
+        .then(function(r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function(data) {
+          var extStore = (data.store && data.store.name) ? data.store.name : jsonUrl;
+          document.getElementById("sc_external_title").textContent = extStore + " — " + (data.name || "");
+          document.getElementById("sc_external").classList.remove("hidden");
+
+          if (!renderTable(data, "sc_external_tbody", "sc_external_total")) {
+            var extEmpty = document.getElementById("sc_external_empty");
+            extEmpty.querySelector("p").textContent = "No hay disponibilidad de este producto en " + extStore;
+            extEmpty.classList.remove("hidden");
+          }
+
+          document.getElementById("sc_local_title").textContent = localStoreName + " — " + (localData.name || "");
+          document.getElementById("sc_local").classList.remove("hidden");
+
+          if (!renderTable(localData, "sc_local_tbody", "sc_local_total")) {
+            var localEmpty = document.getElementById("sc_local_empty");
+            localEmpty.querySelector("p").textContent = "No hay disponibilidad de este producto en " + localStoreName;
+            localEmpty.classList.remove("hidden");
+          }
+        })
+        .catch(function(err) {
+          document.getElementById("sc_error_msg").textContent = "No se pudo cargar: " + err.message;
+          document.getElementById("sc_error").classList.remove("hidden");
+        })
+        .finally(function() {
+          document.getElementById("sc_loading").classList.add("hidden");
+        });
+    })();
+  </script>
+<% end %>

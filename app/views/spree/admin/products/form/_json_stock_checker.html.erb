@@ -1,0 +1,239 @@
+<% bcv_rate = Bcv.last&.value %>
+
+<div class="card mb-4" id="json-stock-checker">
+  <div class="card-header">
+    <h5 class="card-title">Comparar Stock</h5>
+  </div>
+  <div class="card-body">
+    <div class="d-flex gap-2 align-items-end mb-3">
+      <div class="form-group mb-0 flex-grow-1">
+        <label class="label" for="product_json_stock_url">URL del producto (.json)</label>
+        <%= f.text_field :json_stock_url,
+              id: "product_json_stock_url",
+              class: "form-control",
+              placeholder: "https://ejemplo.com/products/mi-producto.json" %>
+      </div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        id="json_stock_fetch_btn"
+      >
+        <i class="ti ti-download"></i> Cargar
+      </button>
+    </div>
+
+    <div id="json_stock_error" class="d-none">
+      <div class="alert alert-danger mb-3" id="json_stock_error_msg"></div>
+    </div>
+
+    <div id="json_stock_loading" class="d-none text-center py-4">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Cargando datos...</p>
+    </div>
+
+    <%# Tabla del stock externo (JSON) %>
+    <div id="json_stock_results" class="d-none mb-4">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">
+          <i class="ti ti-building-store"></i>
+          <span id="json_stock_store_name"></span>
+          &mdash;
+          <span id="json_stock_product_name"></span>
+        </h6>
+        <span class="badge badge-warning" id="json_stock_total"></span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Variante</th>
+              <th class="text-right">Precio</th>
+              <th class="text-right">Precio Bs</th>
+              <th class="text-right">Stock</th>
+            </tr>
+          </thead>
+          <tbody id="json_stock_tbody"></tbody>
+          <tfoot>
+            <tr class="font-weight-bold">
+              <td colspan="3" class="text-right">Total:</td>
+              <td class="text-right" id="json_stock_footer_total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="json_stock_empty" class="d-none">
+        <div class="alert alert-secondary mb-0"><i class="ti ti-info-circle"></i> No hay disponibilidad de este producto en esta tienda</div>
+      </div>
+    </div>
+
+    <%# Tabla del stock local (este store) %>
+    <div id="local_stock_results" class="d-none">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="mb-0">
+          <i class="ti ti-building-store"></i>
+          <%= current_store.name %>
+          &mdash;
+          <%= @product.name %>
+        </h6>
+        <span class="badge badge-warning" id="local_stock_total"></span>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-striped table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Variante</th>
+              <th class="text-right">Precio</th>
+              <th class="text-right">Precio Bs</th>
+              <th class="text-right">Stock</th>
+            </tr>
+          </thead>
+          <tbody id="local_stock_tbody"></tbody>
+          <tfoot>
+            <tr class="font-weight-bold">
+              <td colspan="3" class="text-right">Total:</td>
+              <td class="text-right" id="local_stock_footer_total"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div id="local_stock_empty" class="d-none">
+        <div class="alert alert-secondary mb-0"><i class="ti ti-info-circle"></i> No hay disponibilidad de este producto en esta tienda</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<% local_product_json = product_as_json(@product).to_json %>
+
+<script>
+  (function() {
+    var btn = document.getElementById("json_stock_fetch_btn");
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = "true";
+
+    var urlInput = document.getElementById("product_json_stock_url");
+    var localData = <%= raw local_product_json %>;
+    var bcvRate = <%= bcv_rate.to_f %>;
+
+    function escapeHtml(text) {
+      if (!text) return "";
+      var div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function renderStockTable(data, tbodyId, footerTotalId, totalBadgeId) {
+      var tbody = document.getElementById(tbodyId);
+      var footerTotal = document.getElementById(footerTotalId);
+      var totalBadge = document.getElementById(totalBadgeId);
+      var priceBcv = data.price_bcv || 0;
+
+      var allVariants = [];
+      if (data.master) allVariants.push(data.master);
+      if (data.variants && data.variants.length > 0) {
+        data.variants.forEach(function(v) { allVariants.push(v); });
+      }
+
+      var totalGeneral = 0;
+      var rows = "";
+
+      allVariants.forEach(function(variant) {
+        if (variant.is_master && allVariants.length > 1) return;
+
+        var totalOnHand = variant.total_on_hand != null ? variant.total_on_hand : 0;
+        if (totalOnHand <= 0) return;
+
+        totalGeneral += totalOnHand;
+
+        var variantName = variant.options_text || variant.name || "Master";
+        var price = variant.price != null ? variant.price.toFixed(2) : "-";
+        var priceBs = priceBcv > 0 ? priceBcv.toFixed(2) : "-";
+
+        var stockClass = totalOnHand <= 5 ? "text-warning" : "text-success";
+
+        rows += '<tr>' +
+          '<td>' + escapeHtml(variantName) + '</td>' +
+          '<td class="text-right">' + price + '</td>' +
+          '<td class="text-right">' + priceBs + '</td>' +
+          '<td class="text-right ' + stockClass + '"><strong>' + totalOnHand + '</strong></td>' +
+          '</tr>';
+      });
+
+      tbody.innerHTML = rows;
+      footerTotal.innerHTML = "<strong>" + totalGeneral + "</strong>";
+      if (totalBadge) totalBadge.textContent = "Stock: " + totalGeneral;
+
+      return totalGeneral > 0;
+    }
+
+    function fetchAndRender() {
+      var url = urlInput.value.trim();
+      var errorEl = document.getElementById("json_stock_error");
+      var errorMsg = document.getElementById("json_stock_error_msg");
+      var results = document.getElementById("json_stock_results");
+      var loading = document.getElementById("json_stock_loading");
+      var localResults = document.getElementById("local_stock_results");
+      var productName = document.getElementById("json_stock_product_name");
+      var storeName = document.getElementById("json_stock_store_name");
+
+      if (!url) {
+        results.classList.add("d-none");
+        localResults.classList.add("d-none");
+        errorEl.classList.add("d-none");
+        return;
+      }
+
+      errorEl.classList.add("d-none");
+      results.classList.add("d-none");
+      localResults.classList.add("d-none");
+      loading.classList.remove("d-none");
+      btn.disabled = true;
+
+      fetch(url, { headers: { "Accept": "application/json" } })
+        .then(function(response) {
+          if (!response.ok) throw new Error("Error HTTP: " + response.status);
+          return response.json();
+        })
+        .then(function(data) {
+          productName.textContent = data.name || "Sin nombre";
+
+          var storeLabel = (data.store && data.store.name) ? data.store.name : "";
+          if (!storeLabel) { try { storeLabel = new URL(url).origin; } catch(e) { storeLabel = url; } }
+          storeName.textContent = storeLabel;
+
+          var hasRows = renderStockTable(data, "json_stock_tbody", "json_stock_footer_total", "json_stock_total");
+          results.classList.remove("d-none");
+          if (!hasRows) {
+            var emptyEl = document.getElementById("json_stock_empty");
+            emptyEl.querySelector(".alert").innerHTML = '<i class="ti ti-info-circle"></i> No hay disponibilidad de este producto en <strong>' + escapeHtml(storeLabel) + '</strong>';
+            emptyEl.classList.remove("d-none");
+          }
+
+          var localStoreName = "<%= j(current_store.name) %>";
+          var hasLocalRows = renderStockTable(localData, "local_stock_tbody", "local_stock_footer_total", "local_stock_total");
+          localResults.classList.remove("d-none");
+          if (!hasLocalRows) {
+            var localEmptyEl = document.getElementById("local_stock_empty");
+            localEmptyEl.querySelector(".alert").innerHTML = '<i class="ti ti-info-circle"></i> No hay disponibilidad de este producto en <strong>' + escapeHtml(localStoreName) + '</strong>';
+            localEmptyEl.classList.remove("d-none");
+          }
+        })
+        .catch(function(error) {
+          errorMsg.textContent = "No se pudo cargar: " + error.message;
+          errorEl.classList.remove("d-none");
+        })
+        .finally(function() {
+          loading.classList.add("d-none");
+          btn.disabled = false;
+        });
+    }
+
+    btn.addEventListener("click", fetchAndRender);
+
+    if (urlInput.value.trim()) {
+      fetchAndRender();
+    }
+  })();
+</script>

@@ -1,7 +1,9 @@
 module Spree
   class ProductsController < Spree::StoreController
     helper 'spree/products'
+    include Spree::ProductJsonHelper
 
+    after_action :set_cors_headers, only: [:show, :slugs]
     after_action :track_show, only: :show
     after_action :track_index, only: :index
 
@@ -11,9 +13,23 @@ module Spree
 
     def show
       load_product
-      redirect_if_legacy_path
 
-      @current_page = current_theme.pages.product_details.first
+      respond_to do |format|
+        format.html do
+          redirect_if_legacy_path
+          @current_page = current_theme.pages.product_details.first
+        end
+        format.json { render json: product_as_json(@product) }
+      end
+    end
+
+    def slugs
+      products = current_store.products.active
+      base_url = request.base_url
+      render json: {
+        store: current_store.name,
+        products: products.map { |p| { slug: p.slug, url: "#{base_url}/products/#{p.slug}.json" } }
+      }
     end
 
     def related
@@ -29,6 +45,13 @@ module Spree
     end
 
     private
+
+    def set_cors_headers
+      return unless request.format.json?
+
+      response.headers['Access-Control-Allow-Origin'] = '*'
+      response.headers['Access-Control-Allow-Methods'] = 'GET'
+    end
 
     def accurate_title
       load_product if action_name == 'show' # we need this for ahoy analytics

@@ -241,18 +241,22 @@ module Spree
       end
 
       def prepare_product_params
-        # Preservar campos personalizados antes de procesar los atributos anidados
         price_bcv_value = params[:product][:price_bcv]
+        json_stock_url_value = params[:product][:json_stock_url]
 
         params_service = Spree::Products::PrepareNestedAttributes.new(@product, current_store, permitted_resource_params, current_ability)
         params[:product] = params_service.call
 
-        # Restaurar campos personalizados después del procesamiento
+        needs_reset = false
         if price_bcv_value.present?
           params[:product][:price_bcv] = price_bcv_value
-          # Resetear la memoización para que permitted_resource_params incluya price_bcv
-          @permitted_resource_params = nil
+          needs_reset = true
         end
+        if json_stock_url_value
+          params[:product][:json_stock_url] = json_stock_url_value
+          needs_reset = true
+        end
+        @permitted_resource_params = nil if needs_reset
       end
 
       def collection
