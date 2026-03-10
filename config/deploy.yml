@@ -154,5 +154,8 @@ accessories:
     image: redis:7.4
     host: 192.241.135.86
     port: "127.0.0.1:6379:6379"
+    cmd: redis-server /etc/redis/redis.conf
+    files:
+      - config/redis/redis.conf:/etc/redis/redis.conf
     directories:
       - data:/data
