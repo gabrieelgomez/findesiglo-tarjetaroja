@@ -21,6 +21,13 @@
     class: "dropdown-item",
   ) %>
 
+  <%= link_to_with_icon(
+    "history",
+    "Historial de stock",
+    spree.admin_variant_change_logs_path(product_id: @product.id),
+    class: "dropdown-item",
+  ) %>
+
   <%= render_admin_partials(:product_dropdown_partials, product: @product) %>
 
   <div class="dropdown-divider"></div>
