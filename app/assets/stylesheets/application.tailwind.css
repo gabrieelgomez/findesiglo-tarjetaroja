@@ -526,7 +526,11 @@ a:hover {
 .badge-ready,
 .badge-partial,
 .badge-active,
-.badge-inactive {
+.badge-inactive,
+.badge-apartado,
+.badge-fabricado,
+.badge-empacado,
+.badge-shipped {
   margin-right: 0.25rem;
   display: inline-block;
   border-radius: var(--badge-border-radius);
@@ -549,7 +553,11 @@ a:hover {
 .badge-void:last-child,
 .badge-pending:last-child,
 .badge-ready:last-child,
-.badge-partial:last-child {
+.badge-partial:last-child,
+.badge-apartado:last-child,
+.badge-fabricado:last-child,
+.badge-empacado:last-child,
+.badge-shipped:last-child {
   margin-right: 0px;
 }
 
@@ -569,13 +577,38 @@ a:hover {
 .badge-refunded,
 .badge-pending,
 .badge-void,
-.badge-ready,
 .badge-inactive {
-  background-color: #f3f3f3;
+  background-color: #e5e7eb;
+  color: #6B7280;
+}
+
+.badge-ready {
+  background-color: #bfdbfe;
+  color: #1d4ed8;
 }
 
 .badge-partial {
   background-color: rgb(186 230 253);
+}
+
+.badge-apartado {
+  background-color: #ddd6fe;
+  color: #6d28d9;
+}
+
+.badge-fabricado {
+  background-color: #fde68a;
+  color: #b45309;
+}
+
+.badge-empacado {
+  background-color: #a7f3d0;
+  color: #047857;
+}
+
+.badge-shipped {
+  background-color: #6ee7b7;
+  color: #065f46;
 }
 
 address {

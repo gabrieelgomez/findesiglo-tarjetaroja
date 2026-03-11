@@ -22,7 +22,7 @@
         <% end %>
       </div>
     </div>
-    <div class="card-body mb-0 p-0 <% if @order.completed? && params[:line_item_updated].blank? %>collapse<% else %>show<% end %>" id="line-items">
+    <div class="card-body mb-0 p-0 <% if @order.completed? && params[:line_item_updated].blank? %>show<% else %>show<% end %>" id="line-items">
       <div class="order-line-items">
         <div class="d-flex align-items-center text-muted border-bottom py-2 px-3 font-size-sm order-line-items__row">
           <div class="w-35">

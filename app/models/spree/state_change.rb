@@ -1,6 +1,7 @@
 module Spree
   class StateChange < Spree.base_class
     belongs_to :user, class_name: "::#{Spree.user_class}", optional: true
+    belongs_to :admin_user, class_name: "::#{Spree.admin_user_class}", optional: true
     belongs_to :stateful, polymorphic: true
 
     def <=>(other)

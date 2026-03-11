@@ -6,11 +6,11 @@ module Spree
       include Spree::Admin::OrderBreadcrumbConcern
 
       before_action :initialize_order_events
-      before_action :load_order, only: %i[show edit cancel resend destroy mark_as_completed upload_tracking_image remove_tracking_image send_tracking_whatsapp update_special_instructions]
+      before_action :load_order, only: %i[show edit cancel resend destroy mark_as_completed upload_tracking_image remove_tracking_image send_tracking_whatsapp update_special_instructions update_shipment_state]
       before_action :load_order_items, only: [:edit, :show]
       before_action :load_user, only: [:index]
 
-      helper_method :model_class, :object_url
+      helper_method :model_class, :object_url, :ready_to_ship_orders_count
 
       # POST /admin/orders
       def create
@@ -74,15 +74,14 @@ module Spree
 
       # POST /admin/orders/:id/mark_as_completed
       def mark_as_completed
-        completed_at = Time.current
         completed_by_user = try_spree_current_user
 
-        # Completar la orden guardando quién y cuándo
         @order.update(
           state: 'complete',
-          shipment_state: 'shipped',
+          shipment_state: 'pending',
           payment_state: 'paid',
-          completed_by_id: completed_by_user&.id
+          completed_by_id: completed_by_user&.id,
+          completed_at: Time.current
         )
 
         flash[:success] = Spree.t(:order_marked_as_completed)
@@ -177,6 +176,88 @@ module Spree
         redirect_to spree.edit_admin_order_path(@order)
       end
 
+      # POST /admin/orders/:id/update_shipment_state
+      def update_shipment_state
+        new_state = params[:shipment_state]
+        allowed_states = %w(apartado fabricado empacado shipped canceled)
+        current_user = try_spree_current_user
+
+        unless allowed_states.include?(new_state)
+          flash[:error] = Spree.t(:shipment_state_update_error)
+          redirect_to spree.edit_admin_order_path(@order)
+          return
+        end
+
+        production_sequence = %w(pending apartado fabricado empacado shipped)
+
+        success = true
+        @order.shipments.each do |shipment|
+          next if shipment.state == new_state
+          next if shipment.shipped? && new_state != 'canceled'
+          next if shipment.canceled? && new_state != 'canceled'
+
+          shipment.state_change_user = current_user
+
+          if new_state == 'canceled'
+            begin
+              shipment.cancel!
+            rescue StateMachines::InvalidTransition
+              success = false
+            end
+          else
+            current_state = shipment.state
+            current_state = 'pending' if current_state == 'ready'
+
+            target_idx = production_sequence.index(new_state)
+            current_idx = production_sequence.index(current_state) || 0
+
+            if target_idx && target_idx > current_idx
+              events_to_fire = []
+              (current_idx...target_idx).each do |i|
+                from = production_sequence[i]
+                to = production_sequence[i + 1]
+                event = transition_event(from, to)
+                events_to_fire << event if event
+              end
+
+              events_to_fire.each do |evt|
+                begin
+                  shipment.send("#{evt}!")
+                rescue StateMachines::InvalidTransition
+                  success = false
+                  break
+                end
+              end
+            end
+          end
+        end
+
+        if success
+          new_order_state = Spree::OrderUpdater.new(@order).update_shipment_state
+          @order.update_columns(shipment_state: new_order_state, updated_at: Time.current)
+        end
+
+        if params[:source] == 'list'
+          @order.reload
+          respond_to do |format|
+            format.turbo_stream do
+              render turbo_stream: turbo_stream.replace(
+                ActionView::RecordIdentifier.dom_id(@order),
+                partial: 'spree/admin/orders/order',
+                locals: { order: @order }
+              )
+            end
+            format.html do
+              flash[:success] = success ? Spree.t(:shipment_state_updated) : Spree.t(:shipment_state_update_error)
+              redirect_back fallback_location: spree.admin_orders_path
+            end
+          end
+        else
+          flash[success ? :success : :error] = success ? Spree.t(:shipment_state_updated) : Spree.t(:shipment_state_update_error)
+          redirect_to spree.edit_admin_order_path(@order)
+        end
+      end
+
       # DELETE /admin/orders/:id
       def destroy
         @order.destroy
@@ -191,6 +272,17 @@ module Spree
 
       private
 
+      def transition_event(_from_state, _to_state)
+        {
+          %w(pending ready)       => :ready,
+          %w(pending apartado)    => :apartar,
+          %w(ready apartado)      => :apartar,
+          %w(apartado fabricado)  => :fabricar,
+          %w(fabricado empacado)  => :empacar,
+          %w(empacado shipped)    => :ship,
+        }[[_from_state, _to_state]]
+      end
+
       def scope
         base_scope = current_store.orders.accessible_by(current_ability, :index)
 
@@ -199,6 +291,13 @@ module Spree
         else
           base_scope
         end
+      end
+
+      def ready_to_ship_orders_count
+        current_store.orders.accessible_by(current_ability, :index).complete
+          .where.not(shipment_state: 'shipped')
+          .where.not(state: %w[canceled partially_canceled])
+          .count
       end
 
       def order_params

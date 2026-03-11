@@ -241,7 +241,9 @@ module Spree
     end
 
     def descriptive_name
-      is_master? ? name + ' - Master' : name + ' - ' + options_text
+      n = name.to_s
+      ot = options_text.to_s
+      is_master? ? "#{n} - Master" : "#{n} - #{ot}"
     end
 
     # use deleted? rather than checking the attribute directly. this

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_10_220000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_11_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1455,6 +1455,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_10_220000) do
     t.string "next_state"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "admin_user_id"
+    t.index ["admin_user_id"], name: "index_spree_state_changes_on_admin_user_id"
     t.index ["stateful_id", "stateful_type"], name: "index_spree_state_changes_on_stateful_id_and_stateful_type"
   end
 
@@ -2073,6 +2075,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_10_220000) do
   add_foreign_key "spree_product_property_translations", "spree_product_properties"
   add_foreign_key "spree_product_translations", "spree_products"
   add_foreign_key "spree_property_translations", "spree_properties"
+  add_foreign_key "spree_state_changes", "spree_admin_users", column: "admin_user_id"
   add_foreign_key "spree_store_translations", "spree_stores"
   add_foreign_key "spree_taxon_translations", "spree_taxons"
   add_foreign_key "spree_taxonomy_translations", "spree_taxonomies"

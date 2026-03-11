@@ -1,33 +1,323 @@
-<% if (!@order.completed? || !@order.shipped?) && can?(:update, @order)%>
-  <div class="card mb-3">
-    <div class="card-body">
-      <div class="d-flex align-items-center justify-content-between">
-        <div>
-          <h6 class="card-title mb-1">
-            <i class="fas fa-tasks text-primary me-2"></i>
-            <%= Spree.t(:order_actions) %>
-          </h6>
-          <p class="card-text text-muted mb-0">
-            <% if !@order.completed? %>
+<% if can?(:update, @order) %>
+  <%
+    # Determinar el estado real: usar el estado del primer shipment si existe, sino el de la orden
+    raw_shipment_state = @order.shipment_state || 'pending'
+    first_shipment = @order.shipments.first
+    actual_shipment_state = first_shipment&.state || raw_shipment_state
+
+    # Normalizar estados legacy a nuestro flujo
+    normalized_state = case actual_shipment_state
+                       when 'backorder', 'partial' then 'pending'
+                       else actual_shipment_state
+                       end
+
+    is_completed = @order.completed?
+    is_canceled = normalized_state == 'canceled' || @order.canceled?
+
+    fulfillment_steps = [
+      { state: 'pending',   icon: 'clipboard-list', label: Spree.t(:shipment_states)[:pending],   desc: Spree.t(:fulfillment_step_pending),   color: '#6B7280', bg: '#F3F4F6' },
+      { state: 'ready',     icon: 'circle-check',   label: Spree.t(:shipment_states)[:ready],     desc: Spree.t(:fulfillment_step_ready),     color: '#3B82F6', bg: '#DBEAFE' },
+      { state: 'apartado',  icon: 'hand-stop',       label: Spree.t(:shipment_states)[:apartado],  desc: Spree.t(:fulfillment_step_apartado),  color: '#7C3AED', bg: '#EDE9FE' },
+      { state: 'fabricado', icon: 'shirt',            label: Spree.t(:shipment_states)[:fabricado], desc: Spree.t(:fulfillment_step_fabricado), color: '#D97706', bg: '#FEF3C7' },
+      { state: 'empacado',  icon: 'package',          label: Spree.t(:shipment_states)[:empacado],  desc: Spree.t(:fulfillment_step_empacado),  color: '#059669', bg: '#D1FAE5' },
+      { state: 'shipped',   icon: 'truck-delivery',   label: Spree.t(:shipment_states)[:shipped],   desc: Spree.t(:fulfillment_step_shipped),   color: '#047857', bg: '#A7F3D0' },
+    ]
+
+    state_index = fulfillment_steps.index { |s| s[:state] == normalized_state } || 0
+
+    next_event_map = {
+      'pending'   => { event: 'apartado',  label: Spree.t(:mark_as_apartado) },
+      'ready'     => { event: 'apartado',  label: Spree.t(:mark_as_apartado) },
+      'apartado'  => { event: 'fabricado', label: Spree.t(:mark_as_fabricado) },
+      'fabricado' => { event: 'empacado',  label: Spree.t(:mark_as_empacado) },
+      'empacado'  => { event: 'shipped',   label: Spree.t(:mark_as_enviado) },
+    }
+    next_action = next_event_map[normalized_state]
+  %>
+
+  <%# === COMPLETAR ORDEN (solo si no está completa) === %>
+  <% if !is_completed && !is_canceled %>
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <div>
+            <h6 class="card-title mb-1">
+              <%= icon('clipboard-check', class: 'text-primary me-2') %>
+              <%= Spree.t(:order_actions) %>
+            </h6>
+            <p class="card-text text-muted mb-0">
               <%= Spree.t(:mark_order_as_completed_description) %>
-            <% elsif !@order.shipped? %>
-              <%= Spree.t(:mark_order_as_shipped_description) %>
-            <% end %>
-          </p>
-        </div>
-        <div class="d-flex gap-2">
+            </p>
+          </div>
+          <div class="d-flex gap-2">
             <%= link_to spree.mark_as_completed_admin_order_path(@order),
                 class: "btn btn-primary d-flex align-items-center gap-2",
-                data: { 
-                  turbo_method: :post, 
-                  turbo_confirm: Spree.t(:are_you_sure_mark_as_completed) 
+                data: {
+                  turbo_method: :post,
+                  turbo_confirm: Spree.t(:are_you_sure_mark_as_completed)
                 } do %>
-              <i class="fas fa-check"></i>
+              <%= icon('check') %>
               <%= Spree.t(:mark_as_completed) %>
             <% end %>
-          
+          </div>
         </div>
       </div>
     </div>
-  </div>
-<% end %> 
+  <% end %>
+
+  <%# === FLUJO DE PRODUCCIÓN (solo si la orden está completa y no cancelada) === %>
+  <% if is_completed && !is_canceled %>
+    <div class="card mb-3 border-0 shadow-sm">
+      <div class="card-body pb-2">
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <%= icon('building-factory-2', class: 'text-primary') %>
+            <h6 class="card-title mb-0 fw-bold"><%= Spree.t(:order_fulfillment) %></h6>
+          </div>
+          <% if normalized_state != 'shipped' %>
+            <span class="text-muted" style="font-size: 0.75rem;">
+              <%= Spree.t(:order_fulfillment_description) %>
+            </span>
+          <% end %>
+        </div>
+
+        <%# Nota: se puede apartar desde pendiente (aunque no esté pagado) %>
+        <p class="hidden mb-2 text-muted small" style="font-size: 0.8rem;">
+          <%= Spree.t(:order_fulfillment_apartado_note) %>
+        </p>
+
+        <%# Aviso si está en producción pero aún no pagado %>
+        <% in_production_not_paid = %w(apartado fabricado empacado).include?(normalized_state) && @order.payment_state != 'paid' %>
+        <% if in_production_not_paid %>
+          <div class="alert alert-warning py-2 px-3 mb-3 small d-flex align-items-center gap-2" role="alert" style="font-size: 0.85rem;">
+            <%= icon('alert-triangle', class: 'flex-shrink-0') %>
+            <%= Spree.t(:order_in_production_payment_pending) %>
+          </div>
+        <% end %>
+
+        <%# Mensaje: estado actual → siguiente paso %>
+        <% if normalized_state == 'shipped' %>
+          <p class="mb-3 text-muted small">
+            <%= Spree.t(:order_fulfillment_already_shipped) %>
+          </p>
+        <% elsif next_action %>
+          <%
+            current_step_data = fulfillment_steps[state_index]
+            next_step_data = fulfillment_steps[state_index + 1]
+          %>
+          <p class="mb-3 small d-flex align-items-center flex-wrap gap-1" style="font-weight: 500;">
+            <%= Spree.t(:order_fulfillment_in) %>
+            <%= shipment_state(current_step_data[:state]) %>
+            <%= Spree.t(:order_fulfillment_now_next) %>
+            <%= shipment_state(next_step_data[:state]) %>.
+          </p>
+        <% end %>
+
+        <%# === STEPPER TIMELINE (desktop) === %>
+        <div class="d-none d-md-block mb-3">
+          <div class="position-relative" style="padding: 0 10px;">
+            <div class="position-absolute" style="top: 18px; left: 40px; right: 40px; height: 4px; background: #E5E7EB; border-radius: 2px; z-index: 0;"></div>
+            <% progress_pct = fulfillment_steps.length > 1 ? (state_index.to_f / (fulfillment_steps.length - 1) * 100) : 0 %>
+            <div class="position-absolute" style="top: 18px; left: 40px; width: calc((100% - 80px) * <%= progress_pct %> / 100); height: 4px; background: linear-gradient(90deg, #3B82F6, <%= fulfillment_steps[state_index][:color] %>); border-radius: 2px; z-index: 1; transition: width 0.5s ease;"></div>
+
+            <div class="d-flex justify-content-between position-relative" style="z-index: 2;">
+              <% fulfillment_steps.each_with_index do |step, idx| %>
+                <%
+                  is_current = idx == state_index
+                  is_done = idx < state_index
+                  text_color = is_current ? step[:color] : (is_done ? '#374151' : '#9CA3AF')
+                %>
+                <div class="text-center" style="flex: 1; min-width: 0;">
+                  <div class="d-flex justify-content-center mb-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width: 36px; height: 36px; background: <%= is_current ? step[:color] : (is_done ? '#059669' : '#F3F4F6') %>; border: 3px solid <%= is_current ? step[:color] : (is_done ? '#059669' : '#E5E7EB') %>; transition: all 0.3s ease; box-shadow: <%= is_current ? '0 0 0 4px ' + step[:color] + '22' : 'none' %>;">
+                      <% if is_done %>
+                        <i class="ti ti-check" style="color: white; font-size: 16px;"></i>
+                      <% elsif is_current %>
+                        <i class="ti ti-<%= step[:icon] %>" style="color: white; font-size: 16px;"></i>
+                      <% else %>
+                        <i class="ti ti-<%= step[:icon] %>" style="color: #9CA3AF; font-size: 15px;"></i>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div style="font-size: 0.72rem; font-weight: <%= is_current ? '700' : '500' %>; color: <%= text_color %>; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px;">
+                    <%= step[:label] %>
+                  </div>
+                  <% if is_current %>
+                    <div style="font-size: 0.65rem; color: #6B7280; margin-top: 2px; line-height: 1.2;">
+                      <%= step[:desc] %>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <%# === STEPPER (mobile) === %>
+        <div class="d-md-none mb-3">
+          <% fulfillment_steps.each_with_index do |step, idx| %>
+            <%
+              is_current = idx == state_index
+              is_done = idx < state_index
+            %>
+            <div class="d-flex align-items-start gap-3 position-relative" style="padding-bottom: <%= idx < fulfillment_steps.length - 1 ? '4px' : '0' %>;">
+              <% if idx < fulfillment_steps.length - 1 %>
+                <div class="position-absolute" style="left: 15px; top: 34px; width: 2px; height: calc(100% - 26px); background: <%= is_done ? '#059669' : '#E5E7EB' %>;"></div>
+              <% end %>
+              <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                   style="width: 32px; height: 32px; background: <%= is_current ? step[:color] : (is_done ? '#059669' : '#F3F4F6') %>; border: 2px solid <%= is_current ? step[:color] : (is_done ? '#059669' : '#E5E7EB') %>;">
+                <% if is_done %>
+                  <i class="ti ti-check" style="color: white; font-size: 14px;"></i>
+                <% else %>
+                  <i class="ti ti-<%= step[:icon] %>" style="color: <%= is_current ? 'white' : '#9CA3AF' %>; font-size: 14px;"></i>
+                <% end %>
+              </div>
+              <div style="padding-top: 3px;">
+                <div style="font-size: 0.85rem; font-weight: <%= is_current ? '700' : '500' %>; color: <%= is_current ? step[:color] : (is_done ? '#374151' : '#9CA3AF') %>;">
+                  <%= step[:label] %>
+                </div>
+                <% if is_current %>
+                  <div style="font-size: 0.75rem; color: #6B7280;"><%= step[:desc] %></div>
+                <% end %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+
+        <%# === ACTION BUTTONS === %>
+        <div class="border-top pt-3 mt-1">
+          <% if normalized_state == 'shipped' %>
+            <div class="d-flex align-items-center justify-content-center gap-2 py-2">
+              <i class="ti ti-circle-check" style="color: #059669; font-size: 20px;"></i>
+              <span style="color: #059669; font-weight: 600;"><%= Spree.t(:fulfillment_step_shipped) %></span>
+            </div>
+          <% else %>
+            <%# Next step button (primary action) %>
+            <% if next_action.present? %>
+              <% next_step = fulfillment_steps.find { |s| s[:state] == next_action[:event] } %>
+              <%= link_to spree.update_shipment_state_admin_order_path(@order, shipment_state: next_action[:event]),
+                  class: "btn d-flex align-items-center gap-2 w-100 justify-content-center text-white",
+                  style: "min-height: 48px; background: #{next_step[:color]}; border-color: #{next_step[:color]}; font-weight: 600; font-size: 0.95rem;",
+                  data: {
+                    turbo_method: :post,
+                    turbo_confirm: Spree.t(:are_you_sure_change_state)
+                  } do %>
+                <i class="ti ti-<%= next_step[:icon] %>" style="font-size: 20px;"></i>
+                <span><%= next_action[:label] %></span>
+                <i class="ti ti-arrow-right" style="font-size: 16px;"></i>
+              <% end %>
+            <% end %>
+
+            <%# Jump buttons — remaining steps (excluding the next action) %>
+            <% available_jumps = fulfillment_steps.select { |s|
+              s_idx = fulfillment_steps.index(s)
+              s_idx.present? && s_idx > state_index + 1 && (next_action.nil? || s[:state] != next_action[:event])
+            } %>
+            <% if available_jumps.any? %>
+              <div class="mt-2 d-flex flex-wrap gap-2 align-items-center">
+                <small class="text-muted me-1" style="font-size: 0.75rem;">Saltar a:</small>
+                <% available_jumps.each do |jump| %>
+                  <%= link_to spree.update_shipment_state_admin_order_path(@order, shipment_state: jump[:state]),
+                      class: "btn btn-sm d-flex align-items-center gap-1",
+                      style: "font-size: 0.8rem; padding: 5px 14px; border-radius: 20px; background: #{jump[:bg]}; color: #{jump[:color]}; border: 1px solid #{jump[:color]}40; font-weight: 600;",
+                      data: {
+                        turbo_method: :post,
+                        turbo_confirm: Spree.t(:are_you_sure_change_state)
+                      } do %>
+                    <i class="ti ti-<%= jump[:icon] %>" style="font-size: 15px;"></i>
+                    <%= jump[:label] %>
+                  <% end %>
+                <% end %>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%# === HISTORIAL DE CAMBIOS DE ESTADO === %>
+    <%
+      shipment_state_changes = @order.shipments
+        .flat_map { |s| s.state_changes.where(name: 'shipment').includes(:user, :admin_user) }
+        .sort_by(&:created_at)
+        .reverse
+    %>
+    <% if shipment_state_changes.any? %>
+      <div class="card mb-3 border-0 shadow-sm">
+        <div class="card-body pb-2">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <%= icon('history', class: 'text-muted') %>
+            <h6 class="card-title mb-0 fw-bold"><%= Spree.t(:state_change_history) %></h6>
+            <span class="badge bg-light text-muted border" style="font-size: 0.7rem;"><%= shipment_state_changes.size %></span>
+          </div>
+          <div class="table-responsive">
+            <table class="table table-sm mb-0" style="font-size: 0.82rem;">
+              <thead>
+                <tr class="text-muted" style="font-size: 0.75rem;">
+                  <th class="border-0 pb-2"><%= Spree.t(:date) %></th>
+                  <th class="border-0 pb-2"><%= Spree.t(:state_change_from) %></th>
+                  <th class="border-0 pb-2"></th>
+                  <th class="border-0 pb-2"><%= Spree.t(:state_change_to) %></th>
+                  <th class="border-0 pb-2"><%= Spree.t(:state_change_user) %></th>
+                </tr>
+              </thead>
+              <tbody>
+                <% shipment_state_changes.each do |sc| %>
+                  <%
+                    from_step = fulfillment_steps.find { |s| s[:state] == sc.previous_state }
+                    to_step = fulfillment_steps.find { |s| s[:state] == sc.next_state }
+                    from_color = from_step ? from_step[:color] : '#6B7280'
+                    from_bg = from_step ? from_step[:bg] : '#F3F4F6'
+                    to_color = to_step ? to_step[:color] : (sc.next_state == 'canceled' ? '#DC2626' : '#6B7280')
+                    to_bg = to_step ? to_step[:bg] : (sc.next_state == 'canceled' ? '#FEE2E2' : '#F3F4F6')
+                    from_label = Spree.t("shipment_states.#{sc.previous_state}", default: sc.previous_state&.humanize)
+                    to_label = Spree.t("shipment_states.#{sc.next_state}", default: sc.next_state&.humanize)
+                  %>
+                  <tr>
+                    <td class="align-middle text-muted" style="white-space: nowrap;">
+                      <%= sc.created_at.strftime('%d/%m/%Y %H:%M') %>
+                    </td>
+                    <td class="align-middle">
+                      <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; background: <%= from_bg %>; color: <%= from_color %>; font-weight: 500; font-size: 0.75rem;">
+                        <% if from_step %>
+                          <i class="ti ti-<%= from_step[:icon] %>" style="font-size: 13px;"></i>
+                        <% end %>
+                        <%= from_label %>
+                      </span>
+                    </td>
+                    <td class="align-middle text-center" style="width: 30px;">
+                      <i class="ti ti-arrow-right text-muted" style="font-size: 14px;"></i>
+                    </td>
+                    <td class="align-middle">
+                      <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; background: <%= to_bg %>; color: <%= to_color %>; font-weight: 600; font-size: 0.75rem;">
+                        <% if to_step %>
+                          <i class="ti ti-<%= to_step[:icon] %>" style="font-size: 13px;"></i>
+                        <% end %>
+                        <% if sc.next_state == 'canceled' %>
+                          <i class="ti ti-x" style="font-size: 13px;"></i>
+                        <% end %>
+                        <%= to_label %>
+                      </span>
+                    </td>
+                    <td class="align-middle">
+                      <% author = sc.try(:admin_user).presence || sc.user %>
+                      <% if author.present? %>
+                        <span class="d-flex align-items-center gap-1">
+                          <i class="ti ti-user" style="font-size: 14px; color: #6B7280;"></i>
+                          <span style="font-size: 0.78rem;"><%= [author.try(:first_name), author.try(:last_name)].compact.join(' ').presence || author.try(:email) %></span>
+                        </span>
+                      <% else %>
+                        <span class="text-muted" style="font-size: 0.75rem;">Sistema</span>
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>

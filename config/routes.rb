@@ -98,6 +98,7 @@ Rails.application.routes.draw do
                delete :remove_tracking_image
                post :send_tracking_whatsapp
                patch :update_special_instructions
+               post :update_shipment_state
              end
       end
     end

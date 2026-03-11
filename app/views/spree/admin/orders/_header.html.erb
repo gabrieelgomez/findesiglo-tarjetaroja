@@ -6,7 +6,7 @@
   <% end %>
   <%= @order.number %>
   <%= order_payment_state(@order) %>
-  <%= order_shipment_state(@order) %>
+  <%= shipment_state(@order.shipments.first&.state || @order.shipment_state) %>
   <% if @order.completed? %>
     <span class="text-muted font-size-sm font-weight-normal with-tip">
       <%= I18n.t('activerecord.attributes.spree/order.completed_at') %>
@@ -22,6 +22,13 @@
 
 <%# TODO: Fix mobile %>
 <% content_for :page_actions do %>
+  <% if @order.completed? %>
+    <%= link_to_with_icon "package",
+      "Estado del pedido",
+      main_app.order_status_path(order: @order.number),
+      class: "btn btn-secondary",
+      target: "_blank" %>
+  <% end %>
   <%= link_to_with_icon "file",
     "Ver PDF",
     spree.admin_order_path(@order, format: :pdf),
@@ -34,6 +41,13 @@
 <% end %>
 
 <% content_for(:page_actions_dropdown) do %>
+  <% if @order.completed? %>
+    <%= link_to_with_icon "package",
+    "Estado del pedido",
+    main_app.order_status_path(order: @order.number),
+    class: "text-left dropdown-item",
+    target: "_blank" %>
+  <% end %>
   <% if @order.completed? && spree.respond_to?(:order_path) %>
     <%= link_to_with_icon "eye",
     Spree.t(:preview),
