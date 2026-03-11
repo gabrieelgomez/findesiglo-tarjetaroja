@@ -1,6 +1,6 @@
 # Impresión ESC/POS desde tutarjetaroja.com (QZ Tray con firma)
 
-Para que el botón **"Generar ticket ESC/POS"** funcione cuando la web se abre desde **tutarjetaroja.com** (y no solo en localhost), hay que configurar la **firma con certificado** y registrar el certificado en QZ Tray.
+Para que el botón **"Imprimir comanda"** funcione cuando la web se abre desde **tutarjetaroja.com** (y no solo en localhost), hay que configurar la **firma con certificado** y registrar el certificado en QZ Tray.
 
 La app lee **certificado y clave desde Rails credentials** (recomendado). Opcionalmente puedes usar variables de entorno con rutas a archivos (ver al final).
 

@@ -716,7 +716,7 @@ es:
     backordered_info: Con pedido pendiente
     backorders_allowed: pedidos pendientes permitidos
     balance: Saldo
-    balance_due: Saldo Pendiente
+    balance_due: Pago Pendiente
     barcode: Código de barras
     base_amount: Monto Base
     base_percent: Porcentaje Base
@@ -1487,7 +1487,7 @@ es:
     origin: Origen
     other: Otro
     out_of_stock: Sin Stock
-    outstanding_balance: Saldo Pendiente
+    outstanding_balance: Pago Pendiente
     overview: Resumen
     package_from: paquete desde
     page: Página
@@ -1569,7 +1569,7 @@ es:
     payment_source: Fuente de pago
     payment_state: Estado del Pago
     payment_states:
-      balance_due: Saldo Pendiente
+      balance_due: Pago Pendiente
       checkout: Pago
       complete: Completo
       completed: Completado
