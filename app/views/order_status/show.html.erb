@@ -9,19 +9,52 @@
   .order-status-page .btn { padding: 0.75rem 1.25rem; border-radius: 10px; font-weight: 600; font-size: 0.9375rem; border: none; cursor: pointer; text-decoration: none; display: inline-block; }
   .order-status-page .btn-primary { background: #0ea5e9; color: #fff; }
   .order-status-page .btn-primary:hover { background: #0284c7; }
-  .order-status-page .status-badge { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
-  .order-status-page .status-enviado { background: #dcfce7; color: #166534; }
-  .order-status-page .status-no-enviado { background: #fef3c7; color: #92400e; }
   .order-status-page .detail-row { margin-bottom: 0.5rem; font-size: 0.9375rem; color: #334155; }
   .order-status-page .detail-label { color: #64748b; margin-right: 0.35rem; }
   .order-status-page .tracking-image-wrap { margin-top: 1rem; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; }
   .order-status-page .tracking-image-wrap img { max-width: 100%; height: auto; display: block; }
   .order-status-page .no-image { padding: 2rem; text-align: center; background: #f8fafc; color: #64748b; border-radius: 12px; }
   .order-status-page .error-msg { color: #b91c1c; padding: 1rem; background: #fef2f2; border-radius: 10px; margin-bottom: 1rem; }
-  .order-status-page .order-number-hero { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.5rem; }
-  .order-status-page .status-message { margin-top: 1rem; margin-bottom: 0; font-size: 0.9375rem; color: #334155; line-height: 1.5; }
+  .order-status-page .order-number-hero { font-size: 1.25rem; font-weight: 700; color: #0f172a; margin-bottom: 0.75rem; }
+
+  .os-badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 14px; border-radius: 9999px; font-weight: 600; font-size: 0.875rem; }
+  .os-stepper { display: flex; align-items: flex-start; justify-content: space-between; position: relative; padding: 0 8px; margin: 1.25rem 0 0.5rem; }
+  .os-stepper-line { position: absolute; top: 16px; left: 36px; right: 36px; height: 3px; background: #E5E7EB; border-radius: 2px; z-index: 0; }
+  .os-stepper-progress { position: absolute; top: 16px; left: 36px; height: 3px; border-radius: 2px; z-index: 1; transition: width 0.5s ease; }
+  .os-step { flex: 1; text-align: center; position: relative; z-index: 2; min-width: 0; }
+  .os-step-circle { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; transition: all 0.3s ease; }
+  .os-step-label { font-size: 0.7rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 2px; }
+  .os-step-desc { font-size: 0.65rem; color: #6B7280; margin-top: 2px; line-height: 1.2; }
+  .os-status-msg { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-radius: 10px; margin-top: 1rem; font-size: 0.9375rem; font-weight: 500; }
+
+  @media (max-width: 480px) {
+    .os-stepper { flex-direction: column; gap: 2px; padding: 0; }
+    .os-stepper-line, .os-stepper-progress { display: none; }
+    .os-step { display: flex; align-items: center; gap: 12px; text-align: left; padding: 4px 0; }
+    .os-step-circle { margin: 0; flex-shrink: 0; }
+    .os-step-label { font-size: 0.8rem; }
+    .os-step-desc { display: none; }
+  }
 </style>
 <title>Estado del pedido</title>
+
+<%
+  svg_icons = {
+    'clipboard-list' => '<path d="M9 5h-2a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-12a2 2 0 0 0 -2 -2h-2"/><rect x="9" y="3" width="6" height="4" rx="2"/><path d="M9 12l.01 0"/><path d="M13 12l2 0"/><path d="M9 16l.01 0"/><path d="M13 16l2 0"/>',
+    'circle-check'   => '<path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M9 12l2 2l4 -4"/>',
+    'hand-stop'       => '<path d="M8 13v-7.5a1.5 1.5 0 0 1 3 0v6.5"/><path d="M11 5.5v-2a1.5 1.5 0 1 1 3 0v8.5"/><path d="M14 5.5a1.5 1.5 0 0 1 3 0v6.5"/><path d="M17 7.5a1.5 1.5 0 0 1 3 0v8.5a6 6 0 0 1 -6 6h-2a7 7 0 0 1 -5 -2l-3.6 -4.2a2 2 0 0 1 2.8 -2.8l.8 1"/>',
+    'shirt'           => '<path d="M15 4l6 2v5h-3v8h-12v-8h-3v-5l6 -2a3 3 0 0 0 6 0"/>',
+    'package'         => '<polyline points="12 3 20 7.5 20 16.5 12 21 4 16.5 4 7.5 12 3"/><line x1="12" y1="12" x2="20" y2="7.5"/><line x1="12" y1="12" x2="12" y2="21"/><line x1="12" y1="12" x2="4" y2="7.5"/>',
+    'truck-delivery'  => '<circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/><path d="M5 17h-2v-4m-1 -8h11v12m-4 0h6m4 0h2v-6h-8m0 -5h5l3 5"/><line x1="3" y1="9" x2="7" y2="9"/>',
+    'check'           => '<polyline points="20 6 9 17 4 12"/>',
+  }
+
+  # Solo dos estados visibles para el cliente: Pendiente y Enviado
+  status_messages = {
+    'shipped' => { bg: '#ecfdf5', color: '#047857', text: 'Su pedido ha sido entregado a la agencia de envío. La imagen del tracking será cargada próximamente.' },
+  }
+  default_msg = { bg: '#f8fafc', color: '#64748b', text: 'Su pedido ha sido registrado. Estará pendiente hasta que sea enviado.' }
+%>
 
 <div class="order-status-page">
   <h1>Estado del pedido</h1>
@@ -40,16 +73,62 @@
         No se encontró ninguna orden con el número <strong><%= ERB::Util.html_escape(params[:order]) %></strong>. Verifica el número e intenta de nuevo.
       </div>
     <% else %>
-      <% shipped = @order.shipped? || @order.tracking_image.attached? %>
+      <%
+        raw_state = @order.shipments.first&.state || @order.shipment_state || 'pending'
+        # Hack: en la página pública, empacado se muestra como enviado
+        is_shipped = (raw_state == 'shipped' || raw_state == 'empacado')
+
+        # Solo dos estados visibles: Pendiente y Enviado
+        steps = [
+          { state: 'pending', icon: 'clipboard-list',  label: 'Pendiente', desc: 'Orden registrada',        color: '#6B7280', bg: '#F3F4F6' },
+          { state: 'shipped', icon: 'truck-delivery', label: 'Enviado',   desc: 'Entregado a agencia',     color: '#047857', bg: '#A7F3D0' },
+        ]
+        si = is_shipped ? 1 : 0
+        current_step = steps[si]
+        progress_pct = si == 1 ? 100 : 0
+      %>
+
       <div class="card">
         <div class="card-title">Número de orden</div>
         <div class="order-number-hero"><%= @order.number %></div>
-        <div class="status-badge <%= shipped ? 'status-enviado' : 'status-no-enviado' %>">
-          <%= shipped ? "✓ Enviado" : "○ No enviado" %>
+        <span class="os-badge" style="background: <%= current_step[:bg] %>; color: <%= current_step[:color] %>;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><%= raw svg_icons[current_step[:icon]] %></svg>
+          <%= current_step[:label] %>
+        </span>
+
+        <%# === STEPPER === %>
+        <div class="os-stepper">
+          <div class="os-stepper-line"></div>
+          <div class="os-stepper-progress" style="width: calc(<%= progress_pct %>% - <%= si == steps.length - 1 ? 0 : 8 %>px); background: linear-gradient(90deg, #3B82F6, <%= current_step[:color] %>);"></div>
+          <% steps.each_with_index do |step, idx| %>
+            <%
+              is_current = idx == si
+              is_done = idx < si
+              circle_bg = is_current ? step[:color] : (is_done ? '#059669' : '#F3F4F6')
+              circle_border = is_current ? step[:color] : (is_done ? '#059669' : '#E5E7EB')
+              icon_color = (is_current || is_done) ? 'white' : '#9CA3AF'
+              label_color = is_current ? step[:color] : (is_done ? '#374151' : '#9CA3AF')
+              label_weight = is_current ? '700' : '500'
+              step_svg = is_done ? svg_icons['check'] : svg_icons[step[:icon]]
+            %>
+            <div class="os-step">
+              <div class="os-step-circle" style="background: <%= circle_bg %>; border: 3px solid <%= circle_border %>;<%= is_current ? " box-shadow: 0 0 0 4px #{step[:color]}22;" : '' %>">
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="<%= icon_color %>" stroke-width="<%= is_done ? '2.5' : '2' %>" stroke-linecap="round" stroke-linejoin="round"><%= raw step_svg %></svg>
+              </div>
+              <div class="os-step-label" style="color: <%= label_color %>; font-weight: <%= label_weight %>;"><%= step[:label] %></div>
+              <% if is_current %>
+                <div class="os-step-desc"><%= step[:desc] %></div>
+              <% end %>
+            </div>
+          <% end %>
         </div>
-        <% if shipped %>
-          <p class="status-message">Su pedido ha sido enviado y se encuentra en las oficinas de la agencia de envio o en tránsito, al final de la tarde la imagen del tracking será cargada en el sistema para que confirmes la información desde MRW o Zoom</p>
-        <% end %>
+
+        <%# Status message %>
+        <% msg = is_shipped ? status_messages['shipped'] : default_msg %>
+        <div class="os-status-msg" style="background: <%= msg[:bg] %>; color: <%= msg[:color] %>;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><%= raw svg_icons[current_step[:icon]] %></svg>
+          <%= msg[:text] %>
+        </div>
       </div>
 
       <div class="card">

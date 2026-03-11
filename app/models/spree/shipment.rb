@@ -37,18 +37,20 @@ module Spree
 
     validates :stock_location, presence: true
 
-    attr_accessor :special_instructions
+    attr_accessor :special_instructions, :state_change_user
 
     accepts_nested_attributes_for :address
     accepts_nested_attributes_for :inventory_units
 
     scope :pending, -> { with_state('pending') }
     scope :ready,   -> { with_state('ready') }
+    scope :apartado, -> { with_state('apartado') }
+    scope :fabricado, -> { with_state('fabricado') }
+    scope :empacado, -> { with_state('empacado') }
     scope :shipped, -> { with_state('shipped') }
     scope :ready_or_pending, -> { where(state: %w(ready pending)) }
     scope :trackable, -> { where("tracking IS NOT NULL AND tracking != ''") }
     scope :with_state, ->(*s) { where(state: s) }
-    # sort by most recent shipped_at, falling back to created_at. add "id desc" to make specs that involve this scope more deterministic.
     scope :reverse_chronological, -> { order(Arel.sql('coalesce(spree_shipments.shipped_at, spree_shipments.created_at) desc'), id: :desc) }
     scope :valid, -> { where.not(state: :canceled) }
     scope :canceled, -> { with_state('canceled') }
@@ -66,10 +68,10 @@ module Spree
     delegate :amount_in_cents, to: :display_cost
 
     # shipment state machine (see http://github.com/pluginaweek/state_machine/tree/master for details)
+    # Custom flow: pending → ready → apartado → fabricado → empacado → shipped
     state_machine initial: :pending, use_transactions: false do
       event :ready do
         transition from: :pending, to: :ready, if: lambda { |shipment|
-          # Fix for #2040
           shipment.determine_state(shipment.order) == 'ready'
         }
       end
@@ -78,13 +80,25 @@ module Spree
         transition from: :ready, to: :pending
       end
 
+      event :apartar do
+        transition from: %i(pending ready), to: :apartado
+      end
+
+      event :fabricar do
+        transition from: :apartado, to: :fabricado
+      end
+
+      event :empacar do
+        transition from: :fabricado, to: :empacado
+      end
+
       event :ship do
-        transition from: %i(ready canceled), to: :shipped
+        transition from: %i(empacado ready canceled), to: :shipped
       end
       after_transition to: :shipped, do: [:after_ship, :send_shipment_shipped_webhook]
 
       event :cancel do
-        transition to: :canceled, from: %i(pending ready)
+        transition to: :canceled, from: %i(pending ready apartado fabricado empacado)
       end
       after_transition to: :canceled, do: :after_cancel
 
@@ -100,7 +114,8 @@ module Spree
         shipment.state_changes.create!(
           previous_state: transition.from,
           next_state: transition.to,
-          name: 'shipment'
+          name: 'shipment',
+          user_id: shipment.state_change_user&.id
         )
       end
     end
@@ -168,12 +183,10 @@ module Spree
     end
 
     # Determines the appropriate +state+ according to the following logic:
-    #
-    # pending    unless order is complete and +order.payment_state+ is +paid+
-    # shipped    if already shipped (ie. does not change the state)
-    # ready      all other cases
+    # Preserves custom manufacturing states (apartado, fabricado, empacado) once set.
     def determine_state(order)
       return 'canceled' if canceled? || order.canceled?
+      return state if %w(apartado fabricado empacado).include?(state)
       return 'pending' unless order.can_ship?
       return 'pending' if inventory_units.any?(&:backordered?)
       return 'shipped' if shipped?

@@ -1904,7 +1904,10 @@ en:
       canceled: Canceled
       partial: Partial
       pending: Pending
-      ready: Ready
+      ready: Ready to manufacture
+      apartado: Reserved
+      fabricado: Manufactured
+      empacado: Packed
       shipped: Shipped
     shipment_successfully_shipped: Shipment successfully shipped
     shipment_transfer_error: There was an error transferring variants
@@ -2296,10 +2299,37 @@ en:
     mark_as_completed: "Mark as completed"
     order_cannot_be_completed: "The order cannot be completed at this time"
     order_actions: "Order Actions"
+    order_fulfillment: "Production Flow"
+    order_fulfillment_description: "Advance the order state through the production process"
+    order_fulfillment_current_next_html: "The order is in <strong>%{current}</strong>, the next step is to move it to <strong>%{next_state}</strong>."
+    order_fulfillment_in: "The order is in"
+    order_fulfillment_now_next: "the next step is to move it to"
+    order_fulfillment_already_shipped: "The order has already been shipped."
+    order_fulfillment_apartado_note: "Operators can reserve (apartar) an order from Pending even if not yet paid; the next step will be Manufacture."
+    order_in_production_payment_pending: "This order is in production but payment is still pending."
     mark_order_as_shipped_description: "Mark this order as shipped to move it to completed orders"
     mark_order_as_completed_description: "Mark this order as completed to finish the checkout process"
     are_you_sure_mark_as_shipped: "Are you sure you want to mark this order as shipped?"
     are_you_sure_mark_as_completed: "Are you sure you want to mark this order as completed?"
+    are_you_sure_change_state: "Are you sure you want to change the shipment state?"
+    shipment_state_updated: "Shipment state updated successfully"
+    shipment_state_update_error: "Could not update the shipment state"
+    mark_as_apartado: "Reserve"
+    mark_as_fabricado: "Manufactured"
+    mark_as_empacado: "Packed"
+    mark_as_enviado: "Shipped"
+    mark_as_cancelado: "Cancel"
+    fulfillment_step_pending: "Order registered in the system"
+    fulfillment_step_ready: "Order paid and ready to process"
+    fulfillment_step_apartado: "Products reserved on table"
+    fulfillment_step_fabricado: "Jerseys manufactured"
+    fulfillment_step_empacado: "Order packed and ready"
+    fulfillment_step_shipped: "Delivered to shipping agency"
+    fulfillment_step_canceled: "Order canceled"
+    state_change_history: "State change history"
+    state_change_from: "From"
+    state_change_to: "To"
+    state_change_user: "User"
   views:
     pagination:
       truncate: Truncate

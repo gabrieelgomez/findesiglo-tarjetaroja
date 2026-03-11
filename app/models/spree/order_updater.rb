@@ -118,39 +118,29 @@ module Spree
       )
     end
 
+    MANUFACTURING_STATES = %w(apartado fabricado empacado).freeze
+
     # Updates the +shipment_state+ attribute according to the following logic:
     #
-    # shipped   when all Shipments are in the "shipped" state
-    # partial   when at least one Shipment has a state of "shipped" and there is another Shipment with a state other than "shipped"
-    #           or there are InventoryUnits associated with the order that have a state of "sold" but are not associated with a Shipment.
-    # ready     when all Shipments are in the "ready" state
-    # backorder when there is backordered inventory associated with an order
-    # pending   when all Shipments are in the "pending" state
-    #
-    # The +shipment_state+ value helps with reporting, etc. since it provides a quick and easy way to locate Orders needing attention.
+    # Custom manufacturing flow: pending → ready → apartado → fabricado → empacado → shipped
+    # Manufacturing states take priority over backordered inventory status.
     def update_shipment_state
-      if order.backordered?
+      shipment_states = shipments.states.uniq
+
+      has_manufacturing_state = shipment_states.any? { |s| MANUFACTURING_STATES.include?(s) }
+
+      if !has_manufacturing_state && order.backordered?
         order.shipment_state = 'backorder'
       else
-        # get all the shipment states for this order
-        shipment_states = shipments.states.uniq
-
         order.shipment_state = if shipment_states.size > 1
-                                 if shipment_states.include?('shipped')
+                                 if shipment_states.include?('shipped') && shipment_states.any? { |s| s != 'shipped' }
                                    'partial'
-                                 elsif shipment_states.include?('pending')
-                                   'pending'
                                  else
-                                   'ready'
+                                   state_priority = %w(pending ready apartado fabricado empacado shipped canceled)
+                                   shipment_states.min_by { |s| state_priority.index(s) || 99 }
                                  end
                                else
-                                 # will return nil if no shipments are found
                                  shipment_states.first
-                                 # TODO: inventory unit states?
-                                 # if order.shipment_state && order.inventory_units.where(shipment_id: nil).exists?
-                                 #   shipments exist but there are unassigned inventory units
-                                 #   order.shipment_state = 'partial'
-                                 # end
                                end
       end
 
