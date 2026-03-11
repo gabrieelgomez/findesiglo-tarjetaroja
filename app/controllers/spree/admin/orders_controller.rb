@@ -74,14 +74,15 @@ module Spree
 
       # POST /admin/orders/:id/mark_as_completed
       def mark_as_completed
+        completed_at = Time.current
         completed_by_user = try_spree_current_user
 
+        # Completar la orden guardando quién y cuándo
         @order.update(
           state: 'complete',
-          shipment_state: 'pending',
+          shipment_state: 'shipped',
           payment_state: 'paid',
-          completed_by_id: completed_by_user&.id,
-          completed_at: Time.current
+          completed_by_id: completed_by_user&.id
         )
 
         flash[:success] = Spree.t(:order_marked_as_completed)

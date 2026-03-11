@@ -36,34 +36,32 @@
   %>
 
   <%# === COMPLETAR ORDEN (solo si no está completa) === %>
-  <% if !is_completed && !is_canceled %>
-    <div class="card mb-3">
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          <div>
-            <h6 class="card-title mb-1">
-              <%= icon('clipboard-check', class: 'text-primary me-2') %>
-              <%= Spree.t(:order_actions) %>
-            </h6>
-            <p class="card-text text-muted mb-0">
-              <%= Spree.t(:mark_order_as_completed_description) %>
-            </p>
-          </div>
-          <div class="d-flex gap-2">
-            <%= link_to spree.mark_as_completed_admin_order_path(@order),
-                class: "btn btn-primary d-flex align-items-center gap-2",
-                data: {
-                  turbo_method: :post,
-                  turbo_confirm: Spree.t(:are_you_sure_mark_as_completed)
-                } do %>
-              <%= icon('check') %>
-              <%= Spree.t(:mark_as_completed) %>
-            <% end %>
-          </div>
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <div>
+          <h6 class="card-title mb-1">
+            <%= icon('clipboard-check', class: 'text-primary me-2') %>
+            <%= Spree.t(:order_actions) %>
+          </h6>
+          <p class="card-text text-muted mb-0">
+            <%= Spree.t(:mark_order_as_completed_description) %>
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <%= link_to spree.mark_as_completed_admin_order_path(@order),
+              class: "btn btn-primary d-flex align-items-center gap-2",
+              data: {
+                turbo_method: :post,
+                turbo_confirm: Spree.t(:are_you_sure_mark_as_completed)
+              } do %>
+            <%= icon('check') %>
+            <%= Spree.t(:mark_as_completed) %>
+          <% end %>
         </div>
       </div>
     </div>
-  <% end %>
+  </div>
 
   <%# === FLUJO DE PRODUCCIÓN (solo si la orden está completa y no cancelada) === %>
   <% if is_completed && !is_canceled %>
