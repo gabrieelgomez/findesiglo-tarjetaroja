@@ -6,13 +6,13 @@ module Spree
       def edit; end
 
       def update
-        if @line_item.update(line_item_params)
-          flash[:success] = I18n.t(:line_item_updated_successfully)
-          redirect_to spree.admin_sold_products_path
-        else
-          flash.now[:error] = @line_item.errors.full_messages.to_sentence
-          render :edit, status: :unprocessable_entity
-        end
+        attrs = line_item_params.to_h.select { |_, v| v.present? }
+        @line_item.update_columns(attrs.transform_values { |v| v.to_f })
+        flash[:success] = I18n.t(:line_item_updated_successfully)
+        redirect_to spree.admin_sold_products_path
+      rescue => e
+        flash.now[:error] = e.message
+        render :edit, status: :unprocessable_entity
       end
 
       private
@@ -22,7 +22,7 @@ module Spree
       end
 
       def line_item_params
-        params.require(:line_item).permit(:quantity, :price, :cost_price, :currency, :tax_category_id)
+        params.require(:line_item).permit(:price, :cost_price)
       end
     end
   end

@@ -24,16 +24,6 @@
           <% end %>
 
           <div class="form-group">
-            <%= f.label :quantity, I18n.t(:quantity) %>
-            <%= f.number_field :quantity, class: 'form-control', min: 1, required: true %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :price, I18n.t(:sale_price) %>
-            <%= f.number_field :price, class: 'form-control', step: '0.01', min: '0' %>
-          </div>
-
-          <div class="form-group">
             <%= f.label :cost_price, I18n.t(:cost_price) %>
             <%= f.number_field :cost_price, class: 'form-control', step: '0.01', min: '0' %>
           </div>
@@ -41,11 +31,6 @@
           <div class="form-group">
             <%= f.label :currency, I18n.t(:currency) %>
             <%= f.text_field :currency, class: 'form-control', readonly: true %>
-          </div>
-
-          <div class="form-group">
-            <%= f.label :tax_category_id, I18n.t(:tax_category) %>
-            <%= f.collection_select :tax_category_id, Spree::TaxCategory.all, :id, :name, { include_blank: '-- Ninguna --' }, { class: 'form-control' } %>
           </div>
 
           <div class="form-actions">

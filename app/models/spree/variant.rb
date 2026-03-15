@@ -188,21 +188,31 @@ module Spree
     def self.product_name_or_sku_cont(query)
       sanitized_query = ActiveRecord::Base.sanitize_sql_like(query.to_s.downcase.strip)
       query_pattern = "%#{sanitized_query}%"
+      unaccented_pattern = Arel::Nodes.build_quoted("%#{unaccent_string(sanitized_query)}%")
+
       sku_condition = arel_table[:sku].lower.matches(query_pattern)
 
       if Spree.use_translations?
         translation_arel_table = Product::Translation.arel_table.alias(Product.translation_table_alias)
-        product_name_condition = translation_arel_table[:name].lower.matches(query_pattern)
-        product_description_condition = translation_arel_table[:description].lower.matches(query_pattern)
+        product_name_condition = unaccent_column(translation_arel_table[:name]).matches(unaccented_pattern)
+        product_description_condition = unaccent_column(translation_arel_table[:description]).matches(unaccented_pattern)
 
         joins(:product).
           join_translation_table(Product).
           where(product_name_condition.or(sku_condition).or(product_description_condition))
       else
-        product_name_condition = Product.arel_table[:name].lower.matches(query_pattern)
-        product_description_condition = Product.arel_table[:description].lower.matches(query_pattern)
+        product_name_condition = unaccent_column(Product.arel_table[:name]).matches(unaccented_pattern)
+        product_description_condition = unaccent_column(Product.arel_table[:description]).matches(unaccented_pattern)
         joins(:product).where(product_name_condition.or(sku_condition).or(product_description_condition))
       end
+    end
+
+    def self.unaccent_column(column)
+      Arel::Nodes::NamedFunction.new('unaccent', [Arel::Nodes::NamedFunction.new('LOWER', [column])])
+    end
+
+    def self.unaccent_string(str)
+      ActiveRecord::Base.connection.select_value("SELECT unaccent(#{ActiveRecord::Base.connection.quote(str)})")
     end
 
     def self.search_by_product_name_or_sku(query)
