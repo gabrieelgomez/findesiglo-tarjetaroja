@@ -191,15 +191,17 @@ module Spree
       sku_condition = arel_table[:sku].lower.matches(query_pattern)
 
       if Spree.use_translations?
-        translation_arel_table = Product::Translation.arel_table.alias(Product.translation_table_alias)[:name]
-        product_name_condition = translation_arel_table.lower.matches(query_pattern)
+        translation_arel_table = Product::Translation.arel_table.alias(Product.translation_table_alias)
+        product_name_condition = translation_arel_table[:name].lower.matches(query_pattern)
+        product_description_condition = translation_arel_table[:description].lower.matches(query_pattern)
 
         joins(:product).
           join_translation_table(Product).
-          where(product_name_condition.or(sku_condition))
+          where(product_name_condition.or(sku_condition).or(product_description_condition))
       else
         product_name_condition = Product.arel_table[:name].lower.matches(query_pattern)
-        joins(:product).where(product_name_condition.or(sku_condition))
+        product_description_condition = Product.arel_table[:description].lower.matches(query_pattern)
+        joins(:product).where(product_name_condition.or(sku_condition).or(product_description_condition))
       end
     end
 
