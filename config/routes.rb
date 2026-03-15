@@ -61,7 +61,9 @@ Rails.application.routes.draw do
       resources :expense_reports, only: [:index]
       
       # Sold products routes
-      resources :sold_products, only: [:index]
+      resources :sold_products, only: [:index] do
+        resources :line_items, only: [:edit, :update], controller: 'sold_product_line_items'
+      end
       
       # BCV routes
       resources :bcvs, only: [:edit, :update]

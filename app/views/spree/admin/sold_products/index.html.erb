@@ -87,6 +87,7 @@
                   <th><%= I18n.t(:cost_price) %></th>
                   <th><%= I18n.t(:order) %></th>
                   <th><%= I18n.t(:payment_date) %></th>
+                  <th><%= I18n.t(:actions) %></th>
                 </tr>
               </thead>
               <tbody>
@@ -132,6 +133,11 @@
                     </td>
                     <td>
                       <small><%= line_item.order.payments.completed.last&.updated_at&.strftime('%d/%m/%Y %H:%M') %></small>
+                    </td>
+                    <td>
+                      <%= link_to spree.edit_admin_sold_product_line_item_path(sold_product_id: line_item.id, id: line_item.id), class: 'btn btn-sm btn-outline-primary' do %>
+                        <%= icon 'edit' %>
+                      <% end %>
                     </td>
                   </tr>
                 <% end %>

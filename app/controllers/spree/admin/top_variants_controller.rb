@@ -1,12 +1,30 @@
 module Spree
   module Admin
     class TopVariantsController < Spree::Admin::BaseController
+      include Spree::Admin::Concerns::JsonApiTokenAuthenticatable
+
       before_action :set_date_range
       before_action :set_per_page
 
       def index
         @top_variants = fetch_top_variants
         @summary_stats = calculate_summary_stats
+
+        respond_to do |format|
+          format.html
+          format.json do
+            render json: {
+              summary_stats: @summary_stats,
+              top_variants: @top_variants.map { |v| top_variant_json(v) },
+              meta: {
+                current_page: @top_variants.current_page,
+                total_pages: @top_variants.total_pages,
+                total_count: @top_variants.total_count,
+                per_page: @per_page
+              }
+            }
+          end
+        end
       end
 
       private
@@ -70,6 +88,17 @@ module Spree
         emails = Rails.application.config.x.excluded_report_emails
         return ["1=1"] if emails.blank?
         ["(spree_users.id IS NULL OR spree_users.email NOT IN (?)) AND (spree_orders.email IS NULL OR spree_orders.email NOT IN (?))", emails, emails]
+      end
+
+      def top_variant_json(variant)
+        {
+          id: variant.id,
+          sku: variant.sku,
+          name: variant.name,
+          product_id: variant.product_id,
+          product_name: variant.product&.name,
+          total_quantity: variant.try(:total_quantity).to_i
+        }
       end
     end
   end

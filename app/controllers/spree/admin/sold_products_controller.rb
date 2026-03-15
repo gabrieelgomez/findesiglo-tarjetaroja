@@ -1,13 +1,30 @@
 module Spree
   module Admin
     class SoldProductsController < Spree::Admin::BaseController
+      include Spree::Admin::Concerns::JsonApiTokenAuthenticatable
+
       before_action :set_date_range, only: [:index]
 
       def index
-        return redirect_to spree.admin_orders_path if try_spree_current_user.spree_roles.pluck(:name).include?('operator')
+        if try_spree_current_user&.spree_roles&.pluck(:name)&.include?('operator')
+          return respond_to do |format|
+            format.html { redirect_to spree.admin_orders_path }
+            format.json { render json: { error: 'Forbidden' }, status: :forbidden }
+          end
+        end
 
         @sold_products = fetch_sold_products
         @summary_stats = calculate_summary_stats
+
+        respond_to do |format|
+          format.html
+          format.json do
+            render json: {
+              summary_stats: @summary_stats,
+              sold_products: @sold_products.map { |li| sold_product_line_item_json(li) }
+            }
+          end
+        end
       end
 
       private
@@ -51,6 +68,22 @@ module Spree
         emails = Rails.application.config.x.excluded_report_emails
         return ["1=1"] if emails.blank?
         ["(spree_users.id IS NULL OR spree_users.email NOT IN (?)) AND (spree_orders.email IS NULL OR spree_orders.email NOT IN (?))", emails, emails]
+      end
+
+      def sold_product_line_item_json(line_item)
+        {
+          id: line_item.id,
+          product_id: line_item.product_id,
+          product_name: line_item.product&.name,
+          variant_id: line_item.variant_id,
+          variant_name: line_item.variant&.name,
+          quantity: line_item.quantity,
+          price: line_item.price.to_f,
+          cost_price: line_item.cost_price.to_f,
+          order_number: line_item.order&.number,
+          order_id: line_item.order_id,
+          completed_at: line_item.order&.completed_at&.iso8601
+        }
       end
     end
   end

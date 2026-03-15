@@ -1,0 +1,148 @@
+<% content_for :page_title do %>
+  <%= I18n.t(:edit_line_item) %>
+<% end %>
+
+<div class="row">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">
+          <%= icon 'edit' %>
+          <%= I18n.t(:line_item_info) %>
+        </h3>
+      </div>
+      <div class="card-body">
+        <%= form_with model: @line_item, url: spree.admin_sold_product_line_item_path(sold_product_id: @line_item.id, id: @line_item.id), method: :patch, local: true do |f| %>
+          <% if @line_item.errors.any? %>
+            <div class="alert alert-danger">
+              <ul class="mb-0">
+                <% @line_item.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div class="form-group">
+            <%= f.label :quantity, I18n.t(:quantity) %>
+            <%= f.number_field :quantity, class: 'form-control', min: 1, required: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :price, I18n.t(:sale_price) %>
+            <%= f.number_field :price, class: 'form-control', step: '0.01', min: '0' %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :cost_price, I18n.t(:cost_price) %>
+            <%= f.number_field :cost_price, class: 'form-control', step: '0.01', min: '0' %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :currency, I18n.t(:currency) %>
+            <%= f.text_field :currency, class: 'form-control', readonly: true %>
+          </div>
+
+          <div class="form-group">
+            <%= f.label :tax_category_id, I18n.t(:tax_category) %>
+            <%= f.collection_select :tax_category_id, Spree::TaxCategory.all, :id, :name, { include_blank: '-- Ninguna --' }, { class: 'form-control' } %>
+          </div>
+
+          <div class="form-actions">
+            <%= f.submit I18n.t(:update_line_item), class: 'btn btn-primary' %>
+            <%= link_to I18n.t(:cancel), spree.admin_sold_products_path, class: 'btn btn-secondary' %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-4">
+    <div class="card mb-3">
+      <div class="card-header">
+        <h4 class="card-title">
+          <%= icon 'info-circle' %>
+          <%= I18n.t(:line_item_details) %>
+        </h4>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong><%= I18n.t(:product_name) %>:</strong>
+          <%= link_to @line_item.product.name, spree.edit_admin_product_variant_path(@line_item.product, @line_item.variant) %>
+        </p>
+        <p>
+          <strong><%= I18n.t(:variant_options) %>:</strong>
+          <%= @line_item.variant.options_text %>
+        </p>
+        <p>
+          <strong><%= I18n.t(:sku) %>:</strong>
+          <%= @line_item.variant.sku %>
+        </p>
+        <p>
+          <strong><%= I18n.t(:order_number) %>:</strong>
+          <%= link_to "##{@line_item.order.number}", spree.edit_admin_order_path(@line_item.order) %>
+        </p>
+        <% if @line_item.order.user %>
+          <p>
+            <strong><%= I18n.t(:customer) %>:</strong>
+            <%= @line_item.order.user.email %>
+          </p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-header">
+        <h4 class="card-title">
+          <%= icon 'calculator' %>
+          Totales
+        </h4>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong><%= I18n.t(:adjustment_total) %>:</strong>
+          <span class="text-muted"><%= Spree::Money.new(@line_item.adjustment_total, currency: @line_item.currency) %></span>
+        </p>
+        <p>
+          <strong><%= I18n.t(:additional_tax_total) %>:</strong>
+          <span class="text-muted"><%= Spree::Money.new(@line_item.additional_tax_total, currency: @line_item.currency) %></span>
+        </p>
+        <p>
+          <strong><%= I18n.t(:included_tax_total) %>:</strong>
+          <span class="text-muted"><%= Spree::Money.new(@line_item.included_tax_total, currency: @line_item.currency) %></span>
+        </p>
+        <p>
+          <strong><%= I18n.t(:promo_total) %>:</strong>
+          <span class="text-muted"><%= Spree::Money.new(@line_item.promo_total, currency: @line_item.currency) %></span>
+        </p>
+        <p>
+          <strong><%= I18n.t(:pre_tax_amount) %>:</strong>
+          <span class="text-muted"><%= Spree::Money.new(@line_item.pre_tax_amount, currency: @line_item.currency) %></span>
+        </p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h4 class="card-title">
+          <%= icon 'clock' %>
+          Fechas
+        </h4>
+      </div>
+      <div class="card-body">
+        <p>
+          <strong><%= I18n.t(:created_at) %>:</strong>
+          <%= @line_item.created_at.strftime('%d/%m/%Y %H:%M') %>
+        </p>
+        <p>
+          <strong><%= I18n.t(:updated_at) %>:</strong>
+          <%= @line_item.updated_at.strftime('%d/%m/%Y %H:%M') %>
+        </p>
+        <p>
+          <strong><%= I18n.t(:payment_date) %>:</strong>
+          <%= @line_item.order.payments.completed.last&.updated_at&.strftime('%d/%m/%Y %H:%M') || 'N/A' %>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
