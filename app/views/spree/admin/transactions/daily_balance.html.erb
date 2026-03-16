@@ -2,6 +2,13 @@
   Cuadre Diario
 <% end %>
 
+<% content_for :page_actions do %>
+  <%= link_to export_daily_balance_admin_transactions_path(q: params[:q]&.to_unsafe_h, format: :xlsx), class: 'btn btn-success', id: 'export-excel-btn' do %>
+    <%= icon 'download' %>
+    Exportar Excel
+  <% end %>
+<% end %>
+
 <!-- Calendario Mensual -->
 <div class="row mb-4">
   <div class="col-12">

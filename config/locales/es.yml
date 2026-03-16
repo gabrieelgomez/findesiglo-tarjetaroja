@@ -158,3 +158,4 @@ es:
   variant_options: "Variante"
   created_at: "Creado"
   updated_at: "Última Actualización"
+  export_excel: "Exportar Excel"

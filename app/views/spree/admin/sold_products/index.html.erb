@@ -24,7 +24,11 @@
           </div>
           <div class="col-md-4 d-flex align-items-end">
             <%= form.submit I18n.t(:filter), class: 'btn btn-primary me-2' %>
-            <%= link_to I18n.t(:reset), spree.admin_sold_products_path, class: 'btn btn-outline-secondary' %>
+            <%= link_to I18n.t(:reset), spree.admin_sold_products_path, class: 'btn btn-outline-secondary me-2' %>
+            <%= link_to spree.export_admin_sold_products_path(start_date: @start_date, end_date: @end_date, format: :xlsx), class: 'btn btn-success', id: 'export-excel-btn' do %>
+              <%= icon 'download' %>
+              <%= I18n.t(:export_excel) %>
+            <% end %>
           </div>
         <% end %>
       </div>

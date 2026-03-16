@@ -3,7 +3,7 @@ module Spree
     class SoldProductsController < Spree::Admin::BaseController
       include Spree::Admin::Concerns::JsonApiTokenAuthenticatable
 
-      before_action :set_date_range, only: [:index]
+      before_action :set_date_range, only: [:index, :export]
 
       def index
         if try_spree_current_user&.spree_roles&.pluck(:name)&.include?('operator')
@@ -23,6 +23,17 @@ module Spree
               summary_stats: @summary_stats,
               sold_products: @sold_products.map { |li| sold_product_line_item_json(li) }
             }
+          end
+        end
+      end
+
+      def export
+        @sold_products = fetch_sold_products
+        @summary_stats = calculate_summary_stats
+
+        respond_to do |format|
+          format.xlsx do
+            response.headers['Content-Disposition'] = "attachment; filename=\"productos_vendidos_#{@start_date}_#{@end_date}.xlsx\""
           end
         end
       end

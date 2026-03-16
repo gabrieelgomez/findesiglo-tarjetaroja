@@ -1,0 +1,162 @@
+wb = xlsx_package.workbook
+
+type_labels = { 0 => 'Gastos Fijos', 1 => 'Gastos Variables', 2 => 'Gastos de Inversión', 3 => 'Gastos de Inventario' }
+
+wb.add_worksheet(name: "Reporte de Egresos") do |sheet|
+  title_style = sheet.styles.add_style(
+    b: true, sz: 14,
+    alignment: { horizontal: :left }
+  )
+
+  section_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "333333", fg_color: "FFFFFF",
+    alignment: { horizontal: :left }
+  )
+
+  header_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  summary_label_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_value_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_pct_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  total_label_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "000000" }
+  )
+
+  total_value_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  total_pct_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  money_style = sheet.styles.add_style(num_fmt: 4)
+  pct_style = sheet.styles.add_style(alignment: { horizontal: :center })
+
+  danger_label_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "dc3545", fg_color: "FFFFFF",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "000000" }
+  )
+
+  danger_value_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "dc3545", fg_color: "FFFFFF",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  # === RESUMEN GENERAL ===
+  sheet.add_row ["Reporte de Egresos — #{@start_date.strftime('%d/%m/%Y')} al #{@end_date.strftime('%d/%m/%Y')}"], style: title_style
+  sheet.add_row []
+  sheet.add_row ["Total Egresos", @total_amount.to_f], style: [danger_label_style, danger_value_style]
+  sheet.add_row []
+
+  # === EGRESOS POR TIPO DE GASTO ===
+  sheet.add_row ["Egresos por tipo de gasto"], style: section_style
+  sheet.add_row ["Tipo", "Monto", "% del total"], style: header_style
+
+  [0, 1, 2, 3].each do |type_val|
+    amount = @by_category_type[type_val] || 0
+    pct = @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%'
+    sheet.add_row [type_labels[type_val], amount.to_f, pct], style: [summary_label_style, summary_value_style, summary_pct_style]
+  end
+
+  if @uncategorized_total > 0
+    pct = @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%'
+    sheet.add_row ["Sin categoría", @uncategorized_total.to_f, pct], style: [summary_label_style, summary_value_style, summary_pct_style]
+  end
+
+  sheet.add_row ["TOTAL", @total_amount.to_f, "100%"], style: [total_label_style, total_value_style, total_pct_style]
+  sheet.add_row []
+
+  # === EGRESOS POR CATEGORÍA ===
+  sheet.add_row ["Egresos por Categoría"], style: section_style
+  sheet.add_row ["Categoría", "Monto", "%"], style: header_style
+
+  @by_category.each do |(_, category_name), amount|
+    pct = @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%'
+    sheet.add_row [category_name, amount.to_f, pct], style: [nil, money_style, pct_style]
+  end
+
+  if @uncategorized_total > 0
+    pct = @total_amount > 0 ? "#{(@uncategorized_total / @total_amount * 100).round(1)}%" : '0%'
+    sheet.add_row ["Sin Categoría", @uncategorized_total.to_f, pct], style: [nil, money_style, pct_style]
+  end
+
+  sheet.add_row ["TOTAL", @total_amount.to_f, "100%"], style: [total_label_style, total_value_style, total_pct_style]
+  sheet.add_row []
+
+  # === EGRESOS POR MÉTODO DE PAGO ===
+  sheet.add_row ["Egresos por Método de Pago"], style: section_style
+  sheet.add_row ["Método de Pago", "Monto", "%"], style: header_style
+
+  @by_payment_method.each do |method_name, amount|
+    pct = @total_amount > 0 ? "#{(amount / @total_amount * 100).round(1)}%" : '0%'
+    sheet.add_row [method_name, amount.to_f, pct], style: [nil, money_style, pct_style]
+  end
+
+  sheet.add_row ["TOTAL", @total_amount.to_f, "100%"], style: [total_label_style, total_value_style, total_pct_style]
+  sheet.add_row []
+
+  # === DETALLE DE EGRESOS ===
+  sheet.add_row ["Detalle de Egresos (#{@expenses.count} registros)"], style: section_style
+  sheet.add_row [
+    "Fecha",
+    "Descripción",
+    "Categoría",
+    "Tipo",
+    "Método de Pago",
+    "Monto"
+  ], style: header_style
+
+  @expenses.each do |expense|
+    sheet.add_row [
+      expense.created_at.strftime('%d/%m/%Y %H:%M'),
+      expense.description,
+      expense.expense_category&.name || 'Sin categoría',
+      expense.expense_category&.type_label || '',
+      expense.spree_payment_method.name,
+      expense.amount.to_f
+    ], style: [nil, nil, nil, nil, nil, money_style]
+  end
+
+  sheet.column_widths 30, 40, 25, 25, 25, 15
+end

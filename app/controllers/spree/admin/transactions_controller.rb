@@ -149,6 +149,58 @@ module Spree
         @next_day = Date.parse(@current_date) + 1.day if @current_date.present?
       end
 
+      def export_daily_balance
+        params[:q] ||= {}
+
+        created_at_gt = params[:q][:created_at_gt]
+        created_at_lt = params[:q][:created_at_lt]
+
+        if params[:q][:created_at_gt].present?
+          params[:q][:created_at_gt] = begin
+            Time.zone.parse(params[:q][:created_at_gt]).beginning_of_day
+          rescue StandardError
+            ''
+          end
+        end
+
+        if params[:q][:created_at_lt].present?
+          params[:q][:created_at_lt] = begin
+            Time.zone.parse(params[:q][:created_at_lt]).end_of_day
+          rescue StandardError
+            ''
+          end
+        end
+
+        @payments = payments_completed
+
+        if params[:q][:traspaso_eq].present?
+          case params[:q][:traspaso_eq]
+          when 'true'
+            @payments = @payments.where(traspaso: true)
+          when 'false'
+            @payments = @payments.where(traspaso: false)
+          end
+        end
+
+        if params[:q][:created_at_gt].present? || params[:q][:created_at_lt].present?
+          @payments = @payments.ransack(params[:q]).result
+        end
+
+        @payments = @payments.includes(order: :line_items).reorder(created_at: :desc)
+
+        unique_orders = @payments.map(&:order).compact.uniq
+        @total_shirts_sold = unique_orders.sum { |order| order.line_items.sum(&:quantity) }
+
+        @current_date = created_at_gt
+
+        respond_to do |format|
+          format.xlsx do
+            date_label = @current_date.present? ? @current_date : "#{Date.current}"
+            response.headers['Content-Disposition'] = "attachment; filename=\"cuadre_diario_#{date_label}.xlsx\""
+          end
+        end
+      end
+
       private
 
       def per_page

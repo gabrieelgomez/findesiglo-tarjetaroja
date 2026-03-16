@@ -3,6 +3,10 @@
 <% end %>
 
 <% content_for :page_actions do %>
+  <%= link_to spree.export_admin_expense_reports_path(start_date: @start_date, end_date: @end_date, category_type: @category_type_filter, category_id: @category_filter_id, exclude_inventory: @exclude_inventory ? '1' : nil, format: :xlsx), class: 'btn btn-success', id: 'export-excel-btn' do %>
+    <%= icon 'download' %>
+    Exportar Excel
+  <% end %>
   <%= link_to 'Gastos', spree.admin_expenses_path, class: 'btn btn-outline-secondary' %>
   <%= link_to 'Categorías', spree.admin_expense_categories_path, class: 'btn btn-outline-secondary' %>
 <% end %>

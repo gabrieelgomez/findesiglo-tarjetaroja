@@ -1,0 +1,68 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Productos Vendidos") do |sheet|
+  header_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a",
+    fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  summary_label_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_value_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_money_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  money_style = sheet.styles.add_style(num_fmt: 4)
+
+  sheet.add_row [I18n.t(:total_products_sold), @summary_stats[:total_products_sold]], style: [summary_label_style, summary_value_style]
+  sheet.add_row [I18n.t(:total_sales_value), @summary_stats[:total_sales_value].to_f], style: [summary_label_style, summary_money_style]
+  sheet.add_row [I18n.t(:total_cost_value), @summary_stats[:total_cost_value].to_f], style: [summary_label_style, summary_money_style]
+  sheet.add_row []
+
+  sheet.add_row [
+    I18n.t(:product),
+    I18n.t(:variant),
+    I18n.t(:sku),
+    I18n.t(:quantity),
+    I18n.t(:sale_price),
+    I18n.t(:cost_price),
+    I18n.t(:order),
+    I18n.t(:customer),
+    I18n.t(:payment_date)
+  ], style: header_style
+
+  @sold_products.each do |line_item|
+    sheet.add_row [
+      line_item.product.name,
+      line_item.variant.options_text,
+      line_item.variant.sku,
+      line_item.quantity,
+      line_item.price.to_f,
+      (line_item.cost_price || 0).to_f,
+      line_item.order.number,
+      line_item.order.user&.email || I18n.t(:guest),
+      line_item.order.payments.completed.last&.updated_at&.strftime('%d/%m/%Y %H:%M')
+    ], style: [nil, nil, nil, nil, money_style, money_style, nil, nil, nil]
+  end
+
+  sheet.column_widths 30, 25, 25, 10, 15, 15, 18, 30, 20
+end

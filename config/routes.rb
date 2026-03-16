@@ -54,14 +54,22 @@ Rails.application.routes.draw do
       resources :transactions, only: [:index] do
         collection do
           get :daily_balance
+          get :export_daily_balance
         end
       end
       resources :expenses
       resources :expense_categories
-      resources :expense_reports, only: [:index]
+      resources :expense_reports, only: [:index] do
+        collection do
+          get :export
+        end
+      end
       
       # Sold products routes
       resources :sold_products, only: [:index] do
+        collection do
+          get :export
+        end
         resources :line_items, only: [:edit, :update], controller: 'sold_product_line_items'
       end
       

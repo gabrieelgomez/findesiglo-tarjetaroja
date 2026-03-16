@@ -1,0 +1,137 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Cuadre Diario") do |sheet|
+  title_style = sheet.styles.add_style(
+    b: true, sz: 14,
+    alignment: { horizontal: :left }
+  )
+
+  section_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "333333", fg_color: "FFFFFF",
+    alignment: { horizontal: :left }
+  )
+
+  header_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  summary_label_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_value_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  summary_int_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "f0f0f0",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "cccccc" }
+  )
+
+  total_label_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "000000" }
+  )
+
+  total_value_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  total_int_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a", fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  money_style = sheet.styles.add_style(num_fmt: 4)
+
+  success_label_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "28a745", fg_color: "FFFFFF",
+    alignment: { horizontal: :right },
+    border: { style: :thin, color: "000000" }
+  )
+
+  success_value_style = sheet.styles.add_style(
+    b: true, sz: 12,
+    bg_color: "28a745", fg_color: "FFFFFF",
+    num_fmt: 4,
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  date_label = @current_date.present? ? Date.parse(@current_date).strftime('%d/%m/%Y') : Date.current.strftime('%d/%m/%Y')
+
+  # === TÍTULO ===
+  sheet.add_row ["Cuadre Diario — #{date_label}"], style: title_style
+  sheet.add_row []
+
+  # === RESUMEN DEL DÍA ===
+  sheet.add_row ["Resumen del Día"], style: section_style
+  total_ingresos = @payments.sum(&:amount)
+  sheet.add_row ["Total Ingresos", total_ingresos.to_f], style: [success_label_style, success_value_style]
+  sheet.add_row ["Número de Transacciones", @payments.count], style: [summary_label_style, summary_int_style]
+  sheet.add_row ["Total Productos Vendidos", @total_shirts_sold], style: [summary_label_style, summary_int_style]
+  sheet.add_row []
+
+  # === INGRESOS POR MÉTODO DE PAGO ===
+  sheet.add_row ["Ingresos por Método de Pago"], style: section_style
+  sheet.add_row ["Método de Pago", "Total Ingresado", "Cantidad de Pagos"], style: header_style
+
+  payments_by_method = @payments.group_by(&:payment_method)
+  Spree::PaymentMethod.active.order(position: :asc).each do |payment_method|
+    method_payments = payments_by_method[payment_method] || []
+    method_total = method_payments.sum(&:amount)
+    sheet.add_row [payment_method.name, method_total.to_f, method_payments.count], style: [nil, money_style, nil]
+  end
+
+  sheet.add_row ["Total General", total_ingresos.to_f, @payments.count], style: [total_label_style, total_value_style, total_int_style]
+  sheet.add_row []
+
+  # === DETALLE DE INGRESOS ===
+  sheet.add_row ["Detalle de Ingresos (#{@payments.count} transacciones)"], style: section_style
+  sheet.add_row [
+    "Cliente",
+    "Pedido",
+    "Monto",
+    "Método de Pago",
+    "Productos",
+    "Traspaso",
+    "Fecha y Hora"
+  ], style: header_style
+
+  @payments.each do |payment|
+    shirts_count = payment.order.present? ? payment.order.line_items.sum(&:quantity) : 0
+    sheet.add_row [
+      payment.order&.bill_address&.full_name || 'Sin nombre',
+      payment.order&.number,
+      payment.amount.to_f,
+      payment.payment_method.name,
+      shirts_count,
+      payment.traspaso ? 'Sí' : 'No',
+      payment.created_at.strftime('%d/%m/%Y %H:%M')
+    ], style: [nil, nil, money_style, nil, nil, nil, nil]
+  end
+
+  sheet.column_widths 30, 18, 15, 25, 12, 12, 20
+end
