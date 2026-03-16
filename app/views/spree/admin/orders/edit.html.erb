@@ -16,6 +16,14 @@
       <%= render 'refunds'%>
       <%= render 'adjustments', adjustments: @order.all_adjustments, title: Spree.t(:order_adjustments) %>
       <%= render_admin_partials(:order_page_body_partials, order: @order) %>
+      <% if @order.line_items.sum(:quantity) <= 2 %>
+        <div class="alert alert-warning d-flex align-items-center mb-4" role="alert">
+          <i class="fa fa-exclamation-triangle mr-3" style="font-size: 1.5rem;"></i>
+          <div>
+            <strong>PEDIDO AL DETAL</strong> — Recuerda agregar el ajuste para vender al detal.
+          </div>
+        </div>
+      <% end %>
       <%= render 'summary' %>
     </div>
     <div class="col-lg-4">
