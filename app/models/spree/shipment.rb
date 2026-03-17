@@ -326,7 +326,7 @@ module Spree
     end
 
     def ready_or_pending?
-      ready? || pending?
+      ready? || pending? || apartado? || fabricado? || empacado?
     end
 
     def refresh_rates(shipping_method_filter = ShippingMethod::DISPLAY_ON_FRONT_END)
