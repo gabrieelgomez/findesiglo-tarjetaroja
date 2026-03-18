@@ -8,4 +8,10 @@
 
 <% content_for :page_actions do %>
   <%= link_to_with_icon 'plus', Spree.t(:new_product), new_object_url, class: 'btn btn-primary' if can?(:create, Spree::Product) %>
+  <% q_params = params[:q].respond_to?(:to_unsafe_h) ? params[:q].to_unsafe_h : params[:q] %>
+  <%= link_to_with_icon 'table-export',
+    'Exportar activos (Excel)',
+    spree.export_active_variants_costs_admin_products_path(format: :xlsx, q: q_params),
+    class: 'btn btn-light bg-transparent',
+    title: 'Descargar productos activos filtrados (Excel)' %>
 <% end %>

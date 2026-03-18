@@ -1,0 +1,38 @@
+wb = xlsx_package.workbook
+
+wb.add_worksheet(name: "Productos Activos") do |sheet|
+  header_style = sheet.styles.add_style(
+    b: true,
+    bg_color: "1a1a1a",
+    fg_color: "FFFFFF",
+    alignment: { horizontal: :center },
+    border: { style: :thin, color: "000000" }
+  )
+
+  money_style = sheet.styles.add_style(num_fmt: 4)
+
+  sheet.add_row [
+    "Producto",
+    "Variación",
+    "SKU",
+    "Precio costo",
+    "Precio venta"
+  ], style: header_style
+
+  @products.each do |product|
+    product.variants_including_master.each do |variant|
+      price = variant.price_in(@currency)
+
+      sheet.add_row [
+        product.name,
+        (variant == product.master ? "Master" : (variant.options_text.presence || variant.name.presence || variant.sku)),
+        variant.sku,
+        variant.cost_price&.to_f,
+        price&.amount&.to_f
+      ], style: [nil, nil, nil, money_style, money_style]
+    end
+  end
+
+  sheet.column_widths 40, 35, 25, 18, 18
+end
+

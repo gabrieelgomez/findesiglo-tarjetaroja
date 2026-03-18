@@ -53,6 +53,41 @@ module Spree
         end
       end
 
+      def export_active_variants_costs
+        raw_q = params[:q]
+        q = if raw_q.respond_to?(:to_unsafe_h)
+              raw_q.to_unsafe_h
+            elsif raw_q.is_a?(Hash)
+              raw_q
+            elsif raw_q.present?
+              raw_q.to_h
+            else
+              {}
+            end.deep_dup
+        q[:deleted_at_null] ||= '1'
+        q[:s] ||= 'name asc'
+        q[:status_eq] = 'active'
+        q.delete(:status_not_eq)
+
+        base_scope = current_store.products.accessible_by(current_ability, :index)
+        base_scope = base_scope.with_deleted if q[:deleted_at_null] == '0'
+
+        @search = base_scope.ransack(q.except(:deleted_at_null))
+        @products = @search
+          .result(distinct: true)
+          .for_ordering_with_translations(model_class, :name)
+          .includes(variants_including_master: :prices)
+
+        @currency = current_store.default_currency
+
+        respond_to do |format|
+          format.xlsx do
+            timestamp = Time.zone.now.strftime('%Y%m%d%H%M%S')
+            response.headers['Content-Disposition'] = "attachment; filename=\"productos_activos_variaciones_costos_#{timestamp}.xlsx\""
+          end
+        end
+      end
+
       def show
         redirect_to action: :edit
       end

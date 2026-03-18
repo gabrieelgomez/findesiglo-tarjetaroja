@@ -78,6 +78,9 @@ Rails.application.routes.draw do
       
       # Product variants sales report
       resources :products, only: [] do
+        collection do
+          get :export_active_variants_costs
+        end
         resources :product_variants_sales, only: [:index]
         resources :product_orders, only: [:index]
       end
