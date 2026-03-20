@@ -95,10 +95,9 @@
                     </td>
                     <td>
                       <div class="d-flex align-items-center">
-                        <% if variant.images.any? %>
-                          <%= image_tag variant.images.first.url(:mini), class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;' %>
-                        <% elsif variant.product.images.any? %>
-                          <%= image_tag variant.product.images.first.url(:mini), class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;' %>
+                        <% img = variant.default_image %>
+                        <% if img.present? && img.attached? && img.variable? %>
+                          <%= spree_image_tag(img.attachment, width: 40, height: 40, class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;', alt: variant.product.name) %>
                         <% end %>
                         <div>
                           <%= link_to variant.product.name, spree.edit_admin_product_path(variant.product), class: 'text-decoration-none' %>

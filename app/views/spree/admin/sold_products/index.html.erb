@@ -100,7 +100,10 @@
                     <td>
                       <%= link_to spree.edit_admin_product_variant_path(line_item.product, line_item.variant), class: "d-flex align-items-center text-decoration-none" do %>
                         <% if line_item.variant.images.any? %>
-                          <%= image_tag line_item.variant.images.first.url(:mini), class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover;' %>
+                          <% att = line_item.variant.images.first.attachment %>
+                          <% if att.attached? && att.variable? %>
+                            <%= spree_image_tag(att, width: 40, height: 40, class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover;', alt: line_item.product.name) %>
+                          <% end %>
                         <% end %>
                         <div>
                           <strong><%= line_item.product.name %></strong>

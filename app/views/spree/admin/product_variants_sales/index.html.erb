@@ -95,7 +95,10 @@
                     <td>
                       <div class="d-flex align-items-center">
                         <% if variant.images.any? %>
-                          <%= image_tag variant.images.first.url(:mini), class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;' %>
+                          <% att = variant.images.first.attachment %>
+                          <% if att.attached? && att.variable? %>
+                            <%= spree_image_tag(att, width: 40, height: 40, class: 'me-2', style: 'width: 40px; height: 40px; object-fit: cover; border-radius: 4px;', alt: @product.name) %>
+                          <% end %>
                         <% end %>
                         <div>
                           <strong><%= @product.name %></strong>
