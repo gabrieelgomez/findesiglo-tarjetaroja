@@ -1,15 +1,37 @@
 <%
-  # Detectar si hay un pago con método "Pagomovil"
-  has_pagomovil = @order&.payments&.any? { |p| p.payment_method&.name == "Pagomovil" }
-  bcv_rate = has_pagomovil ? (Bcv.last&.value_whatsapp || 1) : nil
+  # Pagos en bolívares: precio en Bs = price_bcv (dólar BCV del producto) × tasa Bcv.last.value
+  bs_payment_method_names = ["Pagomovil", "Bs"].freeze
+  has_pagomovil = @order&.payments&.any? { |p| bs_payment_method_names.include?(p.payment_method&.name) }
+  bcv_rate = nil
+  if has_pagomovil
+    v = Bcv.last&.value.to_f
+    bcv_rate = v.positive? ? v : 1.0
+  end
   currency_symbol = has_pagomovil ? "Bs" : "$"
-  
-  # Helper para convertir y formatear precios
+
+  # Unitario y total por línea en Bs (según price_bcv del producto)
+  line_item_unit_bs = lambda do |line_item|
+    pb = line_item.product&.price_bcv
+    return 0.0 if pb.blank?
+    pb.to_f * bcv_rate
+  end
+  line_item_total_bs = ->(line_item) { line_item_unit_bs.call(line_item) * line_item.quantity }
+
+  invoice_items_bs_total = if has_pagomovil && @order&.line_items
+                             @order.line_items.sum { |li| line_item_total_bs.call(li) }
+                           end
+  invoice_order_total_bs = if has_pagomovil && @order && invoice_items_bs_total
+                             non_items_usd = @order.total.to_f - @order.item_total.to_f
+                             invoice_items_bs_total + (non_items_usd * bcv_rate)
+                           end
+
   format_price_for_invoice = ->(amount) {
     return "#{currency_symbol} 0.00" if amount.nil?
     converted = has_pagomovil ? (amount.to_f * bcv_rate) : amount.to_f
     "#{currency_symbol} #{'%.2f' % converted}"
   }
+
+  format_bs_number = ->(num) { "#{currency_symbol} #{'%.2f' % num.to_f}" }
 %>
 
 <div class="address-image-container-a4" id="address-image-container-a4">
@@ -130,7 +152,7 @@
             
             <!-- Price -->
             <div style="flex: 1; text-align: right; padding-right: 10px; font-size: 11px; color: #333;">
-              <%= has_pagomovil ? format_price_for_invoice.call(line_item.price) : line_item.single_display_amount %>
+              <%= has_pagomovil ? format_bs_number.call(line_item_unit_bs.call(line_item)) : line_item.single_display_amount %>
             </div>
             
             <!-- Quantity -->
@@ -140,7 +162,7 @@
             
             <!-- Total -->
             <div style="flex: 1; text-align: right; font-size: 11px; font-weight: 600; color: #333;">
-              <%= has_pagomovil ? format_price_for_invoice.call(line_item.amount) : line_item.display_amount %>
+              <%= has_pagomovil ? format_bs_number.call(line_item_total_bs.call(line_item)) : line_item.display_amount %>
             </div>
           </div>
         <% end %>
@@ -214,7 +236,7 @@
           </div>
           <div style="display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 11px;">
             <span style="color: #666; font-weight: 600;">Subtotal:</span>
-            <span style="color: #333; font-weight: 600;"><%= has_pagomovil ? format_price_for_invoice.call(@order&.item_total) : (@order&.display_item_total || "$0.00") %></span>
+            <span style="color: #333; font-weight: 600;"><%= has_pagomovil ? format_bs_number.call(invoice_items_bs_total) : (@order&.display_item_total || "$0.00") %></span>
           </div>
           
           <% if @order&.all_adjustments&.eligible&.any? %>
@@ -233,7 +255,7 @@
           
           <div style="border-top: 2px solid #e0e0e0; padding-top: 10px; margin-top: 10px; display: flex; justify-content: space-between;">
             <span style="color: #333; font-size: 13px; font-weight: 700;">Total:</span>
-            <span style="color: #333; font-size: 13px; font-weight: 700;"><%= has_pagomovil ? format_price_for_invoice.call(@order&.total) : (@order&.display_total || "$0.00") %></span>
+            <span style="color: #333; font-size: 13px; font-weight: 700;"><%= has_pagomovil ? format_bs_number.call(invoice_order_total_bs) : (@order&.display_total || "$0.00") %></span>
           </div>
         </div>
       </div>
