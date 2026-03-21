@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_03_11_000000) do
+ActiveRecord::Schema[8.0].define(version: 2026_03_21_120000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
   enable_extension "pg_trgm"
@@ -1018,6 +1018,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_03_11_000000) do
     t.decimal "price_bcv", precision: 10, scale: 2
     t.string "external_product_json"
     t.string "json_stock_url"
+    t.string "youtube_video_url"
     t.index ["available_on"], name: "index_spree_products_on_available_on"
     t.index ["deleted_at"], name: "index_spree_products_on_deleted_at"
     t.index ["discontinue_on"], name: "index_spree_products_on_discontinue_on"

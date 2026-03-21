@@ -48,6 +48,21 @@
           <div class="hidden lg:block" data-product-form-target="desktopMediaGallery">
             <%= render 'spree/products/media_gallery', images: images, desktop: true, product: product %>
           </div>
+
+          <% if (yt_id = Spree::YoutubeVideoId.from_url(product.youtube_video_url)).present? %>
+            <div class="mt-6 mb-8 mx-auto w-full max-w-[min(100%,360px)]">
+              <div class="relative w-full overflow-hidden rounded-lg aspect-[9/16]">
+                <iframe
+                  class="absolute inset-0 h-full w-full border-0"
+                  src="https://www.youtube.com/embed/<%= yt_id %>"
+                  title="<%= h(product.name) %> — YouTube"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowfullscreen
+                  loading="lazy"
+                ></iframe>
+              </div>
+            </div>
+          <% end %>
         </div>
 
         <div class="lg:col-span-5 lg:col-start-8">

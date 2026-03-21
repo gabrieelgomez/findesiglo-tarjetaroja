@@ -278,6 +278,9 @@ module Spree
       def prepare_product_params
         price_bcv_value = params[:product][:price_bcv]
         json_stock_url_value = params[:product][:json_stock_url]
+        youtube_video_url_value = params[:product][:youtube_video_url]
+        had_youtube_video_url_in_request = params[:product].key?(:youtube_video_url) ||
+                                           params[:product].key?('youtube_video_url')
 
         params_service = Spree::Products::PrepareNestedAttributes.new(@product, current_store, permitted_resource_params, current_ability)
         params[:product] = params_service.call
@@ -287,8 +290,11 @@ module Spree
           params[:product][:price_bcv] = price_bcv_value
           needs_reset = true
         end
-        if json_stock_url_value
-          params[:product][:json_stock_url] = json_stock_url_value
+        params[:product][:json_stock_url] = json_stock_url_value if json_stock_url_value
+        needs_reset = true if json_stock_url_value
+        # Igual que json_stock_url pero permitiendo vaciar el campo (si el input vino en el POST)
+        if had_youtube_video_url_in_request
+          params[:product][:youtube_video_url] = youtube_video_url_value
           needs_reset = true
         end
         @permitted_resource_params = nil if needs_reset

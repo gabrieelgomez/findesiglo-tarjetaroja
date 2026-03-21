@@ -1,0 +1,17 @@
+<div class="card mb-4" id="product-youtube-video">
+  <div class="card-header">
+    <h5 class="card-title">Video de YouTube (Short o video)</h5>
+  </div>
+  <div class="card-body">
+    <div class="form-group mb-0">
+      <label class="label" for="product_youtube_video_url">URL del video</label>
+      <%= f.text_field :youtube_video_url,
+            id: "product_youtube_video_url",
+            class: "form-control",
+            placeholder: "https://www.youtube.com/shorts/… o https://www.youtube.com/watch?v=…" %>
+      <small class="form-text text-muted">
+        Se mostrará en la ficha del producto (formato vertical tipo Short). Enlaces admitidos: Shorts, watch?v=, youtu.be, embed.
+      </small>
+    </div>
+  </div>
+</div>
