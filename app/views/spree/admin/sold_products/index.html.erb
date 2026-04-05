@@ -14,18 +14,24 @@
       </div>
       <div class="card-body">
         <%= form_with url: spree.admin_sold_products_path, method: :get, local: true, class: 'row g-3' do |form| %>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <%= form.label :start_date, I18n.t(:start_date), class: 'form-label' %>
             <%= form.date_field :start_date, value: @start_date, class: 'form-control' %>
           </div>
-          <div class="col-md-4">
+          <div class="col-md-3">
             <%= form.label :end_date, I18n.t(:end_date), class: 'form-label' %>
             <%= form.date_field :end_date, value: @end_date, class: 'form-control' %>
+          </div>
+          <div class="col-md-2 d-flex align-items-center pt-4">
+            <div class="form-check">
+              <%= form.check_box :zero_cost, { checked: @zero_cost, class: 'form-check-input' }, '1', '0' %>
+              <%= form.label :zero_cost, "Solo costo 0 o nulo", class: 'form-check-label' %>
+            </div>
           </div>
           <div class="col-md-4 d-flex align-items-end">
             <%= form.submit I18n.t(:filter), class: 'btn btn-primary me-2' %>
             <%= link_to I18n.t(:reset), spree.admin_sold_products_path, class: 'btn btn-outline-secondary me-2' %>
-            <%= link_to spree.export_admin_sold_products_path(start_date: @start_date, end_date: @end_date, format: :xlsx), class: 'btn btn-success', id: 'export-excel-btn' do %>
+            <%= link_to spree.export_admin_sold_products_path(start_date: @start_date, end_date: @end_date, zero_cost: @zero_cost ? '1' : '0', format: :xlsx), class: 'btn btn-success', id: 'export-excel-btn' do %>
               <%= icon 'download' %>
               <%= I18n.t(:export_excel) %>
             <% end %>

@@ -116,9 +116,16 @@
             </div>
 
             <%= render 'spree/products/details', product: product %>
-            <%= render 'spree/products/stock_comparison', product: product %>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="w-full flex justify-center items-center relative py-12 border-t border-gray-200" style="<%= section_styles(section) rescue '' %>">
+    <div class="w-full page-container flex flex-col items-center z-10 w-full max-w-4xl px-5">
+      <div class="w-full">
+        <%= render 'spree/products/stock_comparison', product: product %>
       </div>
     </div>
   </div>

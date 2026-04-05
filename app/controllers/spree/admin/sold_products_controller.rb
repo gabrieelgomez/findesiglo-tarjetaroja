@@ -43,18 +43,23 @@ module Spree
       def set_date_range
         @start_date = params[:start_date].present? ? Date.parse(params[:start_date]) : Date.current.beginning_of_month
         @end_date = params[:end_date].present? ? Date.parse(params[:end_date]) : Date.current
+        @zero_cost = params[:zero_cost] == '1'
       end
 
       def fetch_sold_products
-        Spree::LineItem
+        query = Spree::LineItem
           .joins(:order, :variant)
           .where(order_id: paid_order_ids)
           .includes(:order, :variant, :product, order: [:user, :payments])
           .order('spree_orders.completed_at DESC')
+
+        query = query.where(cost_price: [0, nil]) if @zero_cost
+        query
       end
 
       def calculate_summary_stats
         line_items = Spree::LineItem.where(order_id: paid_order_ids)
+        line_items = line_items.where(cost_price: [0, nil]) if @zero_cost
 
         {
           total_products_sold: line_items.sum(:quantity),
