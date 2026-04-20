@@ -17,13 +17,28 @@
     <div class="text-sm tracking-widest">Cédula: 27420015</div>
     <div class="text-sm tracking-widest">Cuenta: 01720204972045926520</div>
   <% elsif payment_method.name == "Pagomovil" %>
-    <% total_price_bcv = @order.line_items.sum { |li| (li.variant.product.price_bcv || 0) * li.quantity } %>
+    <%
+      subtotal_price_bcv = @order.line_items.sum { |li| (li.variant.product.price_bcv || 0) * li.quantity }
+      total_price_bcv = subtotal_price_bcv
+      discount_bcv = 0
+      # Consultar si hay una promoción activa de tipo Porcentaje Plano (Flat Percent) para aplicar al monto BCV
+      flat_percent_adj = @order.adjustments.promotion.eligible.detect { |a| a.source.respond_to?(:calculator) && a.source.calculator.is_a?(Spree::Calculator::FlatPercentItemTotal) }
+      if flat_percent_adj
+        percent = flat_percent_adj.source.calculator.preferred_flat_percent
+        discount_bcv = subtotal_price_bcv * (percent / 100.0)
+        total_price_bcv = subtotal_price_bcv - discount_bcv
+      end
+    %>
     <div class="text-sm leading-4 uppercase tracking-widest">Datos: </div>
     <div class="text-sm tracking-widest">Banco: Bancamiga 0172</div>
     <div class="text-sm tracking-widest">Cédula: 27420015</div>
     <div class="text-sm tracking-widest">Teléfono: 0412-549-9098</div>
-    <div class="text-sm tracking-widest">Total en BCV: <%= number_to_currency(total_price_bcv, unit: '$', precision: 2) %> </div>
     <div class="text-sm tracking-widest">Tasa de cambio: <%= Bcv.last.value %> </div>
+    <% if flat_percent_adj %>
+      <div class="text-sm tracking-widest">Subtotal: <%= number_to_currency(subtotal_price_bcv, unit: '$', precision: 2) %> BCV </div>
+      <div class="text-sm tracking-widest">Descuento: -<%= number_to_currency(discount_bcv, unit: '$', precision: 2) %> </div>
+    <% end %>
+    <div class="text-sm tracking-widest">Total a pagar: <%= number_to_currency(total_price_bcv, unit: '$', precision: 2) %> BCV </div>
     <div class="text-sm tracking-widest">Total en Bs: <%= number_to_currency(total_price_bcv * Bcv.last.value, unit: 'Bs. ', precision: 2) %> </div>
   <% end %>
 
