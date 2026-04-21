@@ -102,7 +102,7 @@ group :test do
   gem 'rubocop-rspec'
   gem 'jsonapi-rspec'
   gem 'simplecov'
-  gem 'webmock', '~> 3.7', require: false
+  gem 'webmock', '~> 3.26', require: false
   gem 'timecop'
   gem 'rails-controller-testing'
   gem 'webdrivers', '~> 5.0'
